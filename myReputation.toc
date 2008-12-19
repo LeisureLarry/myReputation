@@ -1,0 +1,19 @@
+## Interface: 30000
+
+## Title: Pearl - [my] |cFFFFFFFFReputation|r
+## Version: 30000 R.1 Beta2.1
+
+## Author: Original by Egris & Karmond, myAddons-fork Larry @ Baelgun
+## eMail: stonehedge@gmx.de
+
+## Notes: Changed display of reputation window and chat messages
+## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
+## Notes-frFR:
+
+## Dependencies:
+## OptionalDeps: myAddOns
+## SavedVariables: myReputation_Config
+
+## DefaultState: enabled
+
+myReputation.xml

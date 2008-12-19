@@ -1,0 +1,31 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+        <Script file="localization.lua"/>
+        <Script file="localization.de.lua"/>
+        <Script file="myReputation.lua"/>
+        <Frame name="myReputation_Frame" hidden="false" parent="UIParent">
+                <Scripts>
+                        <OnLoad>
+                                myReputation_OnLoad();
+                        </OnLoad>
+                        <OnEvent>
+                                myReputation_OnEvent(event, arg1);
+                        </OnEvent>
+                </Scripts>
+                <Frames>
+                        <MessageFrame name="myReputation_SplashFrame" frameStrata="LOW" insertMode="TOP" parent="UIParent" toplevel="true">
+                                <Size>
+                                        <AbsDimension x="512" y="100"></AbsDimension>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="CENTER">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="100"></AbsDimension>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <FontString inherits="NumberFontNormalHuge" justifyH="CENTER"></FontString>
+                        </MessageFrame>
+                 </Frames>
+        </Frame>
+</Ui>
