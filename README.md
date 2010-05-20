@@ -18,3 +18,11 @@ I've added a session reputation display in the reputation frame, which the origi
 ## Usage
 
 To open the settings, use the chat command /myrep or /myreputation.
+
+## Version history
+
+### 30300 R1 Beta1
+* the addon is now using blizzards addons gui for the settings
+* the theme settings aren't available any longer supported
+* added all infos in the reputation detail window
+* now using math.floor instead of round

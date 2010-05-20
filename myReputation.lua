@@ -4,7 +4,7 @@
 
 -- Basic Addon Variables
 MYREP_NAME = "myReputation";
-MYREP_VERSION = "30000 R.1 Beta2.1";
+MYREP_VERSION = "30300 R.1 Beta3";
 MYREP_MSG_FORMAT = "%s |cffffff00%s|r";
 MYREP_REGEXP_CHANGED = string.gsub( FACTION_STANDING_CHANGED, "'?%%[1|2]$s'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?", "%(.+)" ); 
@@ -15,34 +15,26 @@ MYREP_TPL_COUNT = 7;
 
 -- Configuration Variables and their Standard Values
 myReputation_Config = { };
-myReputation_Config.Enabled = true;
-myReputation_Config.More = true;
-myReputation_Config.Blizz = false;
-myReputation_Config.Splash = true;
-myReputation_Config.Percent = true;
-myReputation_Config.Debug = false;
-myReputation_Config.Frame = 1;
-myReputation_Config.Tpl = 1;
+
+myReputation_DefaultConfig = { };
+myReputation_DefaultConfig.Enabled = true;
+myReputation_DefaultConfig.More = true;
+myReputation_DefaultConfig.Blizz = false;
+myReputation_DefaultConfig.Splash = true;
+myReputation_DefaultConfig.Debug = false;
+myReputation_DefaultConfig.Frame = 1;
+myReputation_DefaultConfig.Info = 'Text';
+myReputation_DefaultConfig.Tooltip = 'Absolute';
 
 -- Temp Variables and Arrays
 myReputations = { };
 mySessionReputations = { };
 myReputation_Var = { };
 myReputation_Var.InWorld = false;
-myReputation_Var.Help = {
-    MYREP_HELP_TEXT0,
-    MYREP_HELP_TEXT1,
-    MYREP_HELP_TEXT2,
-    MYREP_HELP_TEXT3,
-    MYREP_HELP_TEXT4,
-    MYREP_HELP_TEXT5,
-    MYREP_HELP_TEXT6,
-    MYREP_HELP_TEXT7,
-    MYREP_HELP_TEXT8
-};
 
 -- Function Hooks
 local lOriginal_ReputationFrame_Update;
+local lOriginal_ReputationBar_OnClick;
 local lOriginal_CFAddMessage_Allgemein;
 local lOriginal_CFAddMessage_Kampflog;
 
@@ -53,10 +45,11 @@ local lOriginal_CFAddMessage_Kampflog;
 function myReputation_OnLoad()
     --Slash command
     SlashCmdList["MYREPCOMMAND"] = myReputation_SlashHandler;
-    SLASH_MYREPCOMMAND1 = "/reputation";
-    SLASH_MYREPCOMMAND2 = "/rep";
+    SLASH_MYREPCOMMAND1 = "/myreputation";
+    SLASH_MYREPCOMMAND2 = "/myrep";
 
     -- Register Default Events
+    this:RegisterEvent("ADDON_LOADED");
     this:RegisterEvent("PLAYER_LOGIN");
     this:RegisterEvent("PLAYER_ENTERING_WORLD");
     this:RegisterEvent("UNIT_AURA");
@@ -69,7 +62,21 @@ function myReputation_OnLoad()
 end
 
 function myReputation_OnEvent(event, arg1)
-    -- Fired just before PLAYER_ENTERING_WORLD on login and UI Reload
+	if (event == "ADDON_LOADED") then
+		myReputation_AddOptionMt(myReputation_Config, myReputation_DefaultConfig);
+
+		-- Delete Unused Config Values
+		for i,v in pairs(myReputation_Config) do
+			if (myReputation_DefaultConfig[i] == nil) then
+				if (myReputation_Config.Debug == true) then
+					myReputation_ChatMsg('Clean Up Config '..i);
+				end
+				myReputation_Config[i] = nil;
+			end
+		end
+	end
+	
+	-- Fired just before PLAYER_ENTERING_WORLD on login and UI Reload
     if (event == "PLAYER_LOGIN") then
         if (
             (myReputation_Config.Frame > 0) and
@@ -102,7 +109,6 @@ function myReputation_OnEvent(event, arg1)
 
     -- Events which are usable to get numFactions > 0
     if ((event == "UNIT_AURA") or (event == "PLAYER_TARGET_CHANGED")) then
-
 		-- Save Session StartRep
 		if (not mySessionReputations["Darnassus"]) then
 			
@@ -132,6 +138,14 @@ function myReputation_OnEvent(event, arg1)
 end
 
 ----------------------------------------------------------------------
+-- Metatable Functions
+----------------------------------------------------------------------
+
+function myReputation_AddOptionMt(options, defaults)
+	setmetatable(options, { __index = defaults });
+end
+
+----------------------------------------------------------------------
 -- Other Functions
 ----------------------------------------------------------------------
 
@@ -152,98 +166,42 @@ end
 
 -- SlashHandler
 function myReputation_SlashHandler(msg)
-	local Cmd, SubCmd = myReputation_GetCmd(msg); --call to above function
-	if (Cmd == MYREP_CMD_ON) then
-		myReputation_Toggle(true,false);
-	elseif (Cmd == MYREP_CMD_OFF) then
-		myReputation_Toggle(false,false);
-	elseif (Cmd == MYREP_CMD_BLIZZ) then
-		myReputation_Toggle_Options("Blizz");
-	elseif (Cmd == MYREP_CMD_MORE) then
-		myReputation_Toggle_Options("More");
-	elseif (Cmd == MYREP_CMD_SPLASH) then
-		myReputation_Toggle_Options("Splash");
-	elseif (Cmd == MYREP_CMD_PERCENT) then
-		myReputation_Toggle_Options("Percent");
-	elseif (Cmd == MYREP_CMD_FRAME) then
- 		local Argument, Answer = myReputation_GetArgument(SubCmd); --call to above function
- 		if (Argument == MYREP_SUBCMD) then
-			myReputation_ChatFrame_Change(0,Answer);
-		else
-			myReputation_ChatMsg(format(MYREP_MSG_INVALID_SUBCMD,Argument,MYREP_SUBCMD));
-		end
-	elseif (Cmd == MYREP_CMD_TPL) then
- 		local Argument, Answer = myReputation_GetArgument(SubCmd); --call to above function
- 		if (Argument == MYREP_SUBCMD) then
-			myReputation_Change_Value("Tpl",MYREP_MSG_TPL,Answer,MYREP_TPL_COUNT);
-		else
-			myReputation_ChatMsg(format(MYREP_MSG_INVALID_SUBCMD,Argument,MYREP_SUBCMD));
-		end
-	elseif (Cmd == MYREP_CMD_DEBUG) then
-		myReputation_Toggle_Options("Debug");
-	elseif (Cmd == MYREP_CMD_STATUS) then
+	if (msg == MYREP_CMD_STATUS) then
 		myReputation_DisplayStatus();
+	elseif (msg == MYREP_CMD_DEBUG) then
+		myReputation_Toggle_Options("Debug");
 	else
-		myReputation_DisplayHelp();
+		InterfaceOptionsFrame_OpenToCategory(MYREP_NAME);
 	end;
 end
 
-function myReputation_GetCmd(msg)
- 	if msg then
- 		local a,b,c=strfind(msg, "(%S+)"); --contiguous string of non-space characters
- 		if a then
- 			return c, strsub(msg, b+2);
- 		else	
- 			return "";
- 		end
- 	end
-end
-
-function myReputation_GetArgument(msg)
- 	if msg then
- 		local a,b=strfind(msg, "=");
- 		if a then
- 			return strsub(msg,1,a-1), strsub(msg, b+1);
- 		else	
- 			return "";
- 		end
- 	end
-end
-
-function myReputation_DisplayHelp()
-    local index, value;
-	for index, value in pairs(myReputation_Var.Help) do
-		myReputation_ChatMsg(value);
-	end
-end
-
-
 function myReputation_DisplayStatus()
 	if (myReputation_Config.Enabled == true) then
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_MSG_ON,"."));
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_MSG_ON));
 	else
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_MSG_OFF,"."));
-	end
-	if (myReputation_Config.Blizz == true) then
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_BLIZZ,MYREP_MSG_ON,"."));
-	else
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_BLIZZ,MYREP_MSG_OFF,"."));
-	end
-	if (myReputation_Config.More == true) then
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_MORE,MYREP_MSG_ON,"."));
-	else
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_MORE,MYREP_MSG_OFF,"."));
-	end
-	if (myReputation_Config.Splash == true) then
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_SPLASH,MYREP_MSG_ON,"."));
-	else
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_SPLASH,MYREP_MSG_OFF,"."));
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_MSG_OFF));
 	end
 	if (myReputation_Config.Debug == true) then
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_DEBUG,MYREP_MSG_ON,"."));
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_DEBUG,MYREP_MSG_ON));
 	end
-	myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_FRAME,myReputation_Config.Frame,"."));
-	myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_TPL,myReputation_Config.Tpl,"."));
+	if (myReputation_Config.Blizz == true) then
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_BLIZZ,MYREP_MSG_ON));
+	else
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_BLIZZ,MYREP_MSG_OFF));
+	end
+	if (myReputation_Config.More == true) then
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_MORE,MYREP_MSG_ON));
+	else
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_MORE,MYREP_MSG_OFF));
+	end
+	if (myReputation_Config.Splash == true) then
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_SPLASH,MYREP_MSG_ON));
+	else
+		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_SPLASH,MYREP_MSG_OFF));
+	end
+	myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_FRAME,myReputation_Config.Frame));
+	myReputation_ChatMsg(format(MYREP_MSG_FORMAT,'Info',myReputation_Config.Info));
+	myReputation_ChatMsg(format(MYREP_MSG_FORMAT,'Tooltip',myReputation_Config.Tooltip));
 end
 
 -- Toggles
@@ -259,6 +217,10 @@ function myReputation_Toggle(toggle,init)
             lOriginal_ReputationFrame_Update = ReputationFrame_Update;
             ReputationFrame_Update = myReputation_Frame_Update_New;
         end
+        if (not lOriginal_ReputationBar_OnClick) then
+            lOriginal_ReputationBar_OnClick = ReputationBar_OnClick;
+            ReputationBar_OnClick = myReputation_ReputationBar_OnClick;
+        end
         if (not lOriginal_CFAddMessage_Allgemein) then
             lOriginal_CFAddMessage_Allgemein = getglobal("ChatFrame1").AddMessage;
             getglobal("ChatFrame1").AddMessage = myReputation_CFAddMessage_Allgemein;
@@ -267,7 +229,19 @@ function myReputation_Toggle(toggle,init)
             lOriginal_CFAddMessage_Kampflog = getglobal("ChatFrame2").AddMessage;
             getglobal("ChatFrame2").AddMessage = myReputation_CFAddMessage_Kampflog;
         end
-
+	
+		if (ReputationDetailFrame:GetScript("OnShow") == nil) then
+			ReputationDetailFrame:HookScript("OnShow", function(self, event)
+				if (myReputation_Config.Enabled) then
+					myReputation_ReputationDetailFrame:Show();
+				end
+			end)
+		end
+		if (ReputationDetailFrame:GetScript("OnHide") == nil) then
+			ReputationDetailFrame:HookScript("OnHide", function(self, event)
+				myReputation_ReputationDetailFrame:Hide();
+			end)
+		end
 	else
         --Unhook
         if (lOriginal_ReputationFrame_Update) then
@@ -303,6 +277,7 @@ function myReputation_ChatFrame_Change(checked,value)  --Checked will always be 
 	if (
 		(value ~= nil) and
 		(number > 0) and
+		(number ~= 2) and
 		(number <= FCF_GetNumActiveChatFrames())
 	) then
 		myReputation_Config.Frame = number;
@@ -311,21 +286,6 @@ function myReputation_ChatFrame_Change(checked,value)  --Checked will always be 
 		myReputation_RepMsg(MYREP_MSG_NOTIFY,1.0,1.0,0.0);
 	else
 		myReputation_ChatMsg(format(MYREP_MSG_INVALID_FRAME,FCF_GetNumActiveChatFrames()));
-	end
-end
-
-function myReputation_Change_Value(option,name,value,valid)
-	local number = tonumber(value);
-	if (
-		(value ~= nil) and
-		(number ~= nil) and
-		(number > 0) and
-		(number <= valid)
-	) then
-		myReputation_Config[option] = number;
-		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,name,myReputation_Config[option],"."));
-	else
-		myReputation_ChatMsg(format(MYREP_MSG_INVALID_VALUE,value,name,valid));
 	end
 end
 
@@ -370,8 +330,64 @@ function myReputation_CFAddMessage_Kampflog(self, msg, ...)
     end
 end
 
+function myReputation_ReputationBar_OnClick(self)
+	lOriginal_ReputationBar_OnClick(self);
+	
+	if (myReputation_Config.Debug == true) then
+		myReputation_RepMsg("ReputationBar_OnClick Faction "..self.index);
+	end
+	
+	if (ReputationDetailFrame:IsVisible()) then
+		local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(self.index);
+		local color = FACTION_BAR_COLORS[standingID];
+
+		--Normalize Values
+		barMax = barMax - barMin;
+		barValue = barValue - barMin;
+		barMin = 0;
+
+		local text = GetText("FACTION_STANDING_LABEL"..standingID, gender);
+		local absolute = barValue.."/"..barMax;
+		local percent = format("%.1f%%", barValue / barMax * 100);
+		local difference = 0;
+		
+		if (mySessionReputations[name]) then
+			-- No change in standing
+			if (mySessionReputations[name].standingID == standingID) then
+				difference = barValue - mySessionReputations[name].barValue;
+
+			-- Reputation went up and reached next standing
+			elseif (mySessionReputations[name].standingID < standingID) then
+				difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
+
+			-- Reputation went down and reached next standing
+			else
+				difference = barMax - barValue + mySessionReputations[name].barValue;
+			end
+		end
+
+		myReputation_ReputationDetailFrameDetails:SetTextColor(color.r, color.g, color.b);
+		myReputation_ReputationDetailFrameText:SetText(
+			format(MYREP_MSG_FORMAT, MYREP_INFO_TEXT..":", text)
+		);
+		myReputation_ReputationDetailFrameAbsolute:SetText(
+			format(MYREP_MSG_FORMAT, MYREP_INFO_ABSOLUTE..":", absolute)
+		);
+		myReputation_ReputationDetailFramePercent:SetText(
+			format(MYREP_MSG_FORMAT, MYREP_INFO_PERCENT..":", percent)
+		);
+		myReputation_ReputationDetailFrameDifference:SetText(
+			format(MYREP_MSG_FORMAT, MYREP_INFO_DIFFERENCE..":", difference)
+		);
+	end
+end
+
 function myReputation_Frame_Update_New()
     lOriginal_ReputationFrame_Update();
+	
+	local info = myReputation_Explode(myReputation_Config.Info, ',');
+	local tooltip = myReputation_Explode(myReputation_Config.Tooltip, ',');
+	
 	local numFactions = GetNumFactions();
 	local factionIndex, factionRow, factionTitle, factionStanding, factionBar, factionButton, factionLeftLine, factionBottomLine, factionBackground, color, tooltipStanding;
 	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, isWatched, isChild;
@@ -427,32 +443,63 @@ function myReputation_Frame_Update_New()
                     end
                 end
 				
-                if (myReputation_Config.Tpl == 2) then
-                    factionCompleteInfo = factionStandingtext.." - "..format("%.1f%%",barValue/barMax*100);
-                    factionTooltip = barValue.."/"..barMax;
-                elseif (myReputation_Config.Tpl == 3) then
-                    factionCompleteInfo = string.sub(factionStandingtext, 0, 1).." "..barValue.."/"..barMax;
-                    factionTooltip = format("%.1f%%",barValue/barMax*100).." ("..difference..")";
-                elseif (myReputation_Config.Tpl == 4) then
-                    factionCompleteInfo = string.sub(factionStandingtext, 0, 1).." "..format("%.1f%%",barValue/barMax*100).." ("..difference..")";
-                    factionTooltip = barValue.."/"..barMax;
-                elseif (myReputation_Config.Tpl == 5) then
-                    factionCompleteInfo = format("%.1f%%",barValue/barMax*100).." ("..difference..")";
-                    factionTooltip = barValue.."/"..barMax;
-                elseif (myReputation_Config.Tpl == 6) then
-                    factionCompleteInfo = barValue.."/"..barMax;
-                    factionTooltip = format("%.1f%%",barValue/barMax*100).." ("..difference..")";
-                elseif (myReputation_Config.Tpl == 7) then
-                    factionCompleteInfo = factionStandingtext.." - "..format("%.1f%%",barValue/barMax*100);
-                    factionTooltip = barValue.."/"..barMax.." ("..difference..")";
-				else
-                    factionCompleteInfo = factionStandingtext;
-                    factionTooltip = barValue.." / "..barMax;
-                end
+                local join;
+				
+				factionCompleteInfo = factionStandingtext;
+				if (type(info) == 'table') then
+					factionCompleteInfo = '';
+					join = '';
+
+					for i,v in ipairs(info) do
+						if (v == 'Text') then
+							factionCompleteInfo = factionCompleteInfo..join..factionStandingtext;
+						end
+						if (v == 'Percent') then
+							factionCompleteInfo = factionCompleteInfo..join..format("%.1f%%", barValue / barMax * 100);
+						end
+						if (v == 'Absolute') then
+							factionCompleteInfo = factionCompleteInfo..join..barValue.."/"..barMax;
+						end
+						if (v == 'Difference') then
+							if (join ~= '') then
+								factionCompleteInfo = factionCompleteInfo..join..'('..difference..')';
+							else
+								factionCompleteInfo = factionCompleteInfo..join..difference;
+							end
+						end
+						join = ' ';
+					end
+				end
+
+				factionTooltip = barValue.."/"..barMax;
+				if (type(tooltip) == 'table') then
+					factionTooltip = '';
+					join = '';
+
+					for i,v in ipairs(tooltip) do
+						if (v == 'Text') then
+							factionTooltip = factionTooltip..join..factionStandingtext;
+						end
+						if (v == 'Percent') then
+							factionTooltip = factionTooltip..join..format("%.1f%%", barValue / barMax * 100);
+						end
+						if (v == 'Absolute') then
+							factionTooltip = factionTooltip..join..barValue.."/"..barMax;
+						end
+						if (v == 'Difference') then
+							if (join ~= '') then
+								factionTooltip = factionTooltip..join..'('..difference..')';
+							else
+								factionTooltip = factionTooltip..join..difference;
+							end
+						end
+						join = ' ';
+					end
+				end
 
 				factionStanding:SetText(factionCompleteInfo);
 				factionRow.standingText = factionCompleteInfo;
-				factionRow.tooltip = HIGHLIGHT_FONT_COLOR_CODE.." "..factionTooltip..FONT_COLOR_CODE_CLOSE;
+				factionRow.tooltip = HIGHLIGHT_FONT_COLOR_CODE..factionTooltip..FONT_COLOR_CODE_CLOSE;
 			end
 		end
 	end

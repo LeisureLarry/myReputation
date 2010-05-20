@@ -1,19 +1,17 @@
-## Interface: 30000
+## Interface: 30300
 
 ## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 30000 R.1 Beta2.1
+## Version: 30300 R.1 Beta3
 
-## Author: Original by Egris & Karmond, myAddons-fork Larry @ Baelgun
+## Author: Original by Egris & Karmond, Fork by Larry @ Baelgun
 ## eMail: stonehedge@gmx.de
+## URL: http://wow.curse.com/downloads/wow-addons/details/my-reputation.aspx
 
 ## Notes: Changed display of reputation window and chat messages
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
-## Notes-frFR:
-
-## Dependencies:
-## OptionalDeps: myAddOns
-## SavedVariables: myReputation_Config
 
 ## DefaultState: enabled
+## SavedVariables: myReputation_Config
 
 myReputation.xml
+myReputationOptions.xml

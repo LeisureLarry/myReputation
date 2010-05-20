@@ -1,31 +1,134 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-        <Script file="localization.lua"/>
-        <Script file="localization.de.lua"/>
-        <Script file="myReputation.lua"/>
-        <Frame name="myReputation_Frame" hidden="false" parent="UIParent">
-                <Scripts>
-                        <OnLoad>
-                                myReputation_OnLoad();
-                        </OnLoad>
-                        <OnEvent>
-                                myReputation_OnEvent(event, arg1);
-                        </OnEvent>
-                </Scripts>
-                <Frames>
-                        <MessageFrame name="myReputation_SplashFrame" frameStrata="LOW" insertMode="TOP" parent="UIParent" toplevel="true">
-                                <Size>
-                                        <AbsDimension x="512" y="100"></AbsDimension>
-                                </Size>
-                                <Anchors>
-                                        <Anchor point="CENTER">
-                                                <Offset>
-                                                        <AbsDimension x="0" y="100"></AbsDimension>
-                                                </Offset>
-                                        </Anchor>
-                                </Anchors>
-                                <FontString inherits="NumberFontNormalHuge" justifyH="CENTER"></FontString>
-                        </MessageFrame>
-                 </Frames>
-        </Frame>
+
+	<Script file="localization.lua"/>
+	<Script file="localization.de.lua"/>
+	<Script file="myReputation.lua"/>
+
+	<Frame name="myReputation_Frame" hidden="false" parent="UIParent">
+		<Scripts>
+			<OnLoad>
+				myReputation_OnLoad();
+			</OnLoad>
+			<OnEvent>
+				myReputation_OnEvent(event, arg1);
+			</OnEvent>
+		</Scripts>
+		<Frames>
+			<MessageFrame name="myReputation_SplashFrame" frameStrata="LOW" insertMode="TOP" parent="UIParent" toplevel="true">
+				<Size>
+					<AbsDimension x="512" y="100"></AbsDimension>
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="100"></AbsDimension>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<FontString inherits="NumberFontNormalHuge" justifyH="CENTER"></FontString>
+			</MessageFrame>
+		 </Frames>
+	</Frame>
+
+	<Frame name="myReputation_ReputationDetailFrame" enableMouse="true" hidden="true">
+		<Size>
+			<AbsDimension x="192" y="143"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="ReputationFrame" relativePoint="TOPRIGHT">
+				<Offset>
+					<AbsDimension x="-30" y="-208"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11"/>
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32"/>
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32"/>
+			</EdgeSize>
+		</Backdrop>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentDetails" inherits="GameFontHighlight" justifyH="LEFT" text="MYREP_MSG_MORE">
+					<Size>
+						<AbsDimension x="170" y="0"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="20" y="-21"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentText" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="170" y="0"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentDetails" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-8"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentAbsolute" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="170" y="0"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentText" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentPercent" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="170" y="0"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentAbsolute" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentDifference" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="170" y="0"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentPercent" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-Reputation-DetailBackground">
+					<Size>
+						<AbsDimension x="236" y="128"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="11" y="-11"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+
 </Ui>
