@@ -21,6 +21,10 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 40000 R1 Beta2
+* fixed session tracking for guild reputation
+* purged getglobal
+
 ### 40000 R1 Beta1
 * fixed this/self problem
 * fixed position of detail window

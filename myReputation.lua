@@ -4,14 +4,13 @@
 
 -- Basic Addon Variables
 MYREP_NAME = "myReputation";
-MYREP_VERSION = "40000 R.1 Beta1";
+MYREP_VERSION = "40000 R.1 Beta2";
 MYREP_MSG_FORMAT = "%s |cffffff00%s|r";
 MYREP_REGEXP_CHANGED = string.gsub( FACTION_STANDING_CHANGED, "'?%%[1|2]$s'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED_GENERIC = string.gsub( FACTION_STANDING_DECREASED_GENERIC, "'?%%[s|d]'?", "%(.+)" ); 
 MYREP_REGEXP_INCREASED = string.gsub( FACTION_STANDING_INCREASED, "'?%%[s|d]'?", "%(.+)" );
 MYREP_REGEXP_INCREASED_GENERIC = string.gsub( FACTION_STANDING_INCREASED_GENERIC, "'?%%[s|d]'?", "%(.+)" );
-MYREP_TPL_COUNT = 7; 
 
 -- Configuration Variables and their Standard Values
 myReputation_Config = { };
@@ -37,6 +36,10 @@ local lOriginal_ReputationFrame_Update;
 local lOriginal_ReputationBar_OnClick;
 local lOriginal_CFAddMessage_Allgemein;
 local lOriginal_CFAddMessage_Kampflog;
+
+-- A local speeds up access to _G slightly
+-- http://www.wowwiki.com/API_getglobal
+local _G = _G;
 
 ----------------------------------------------------------------------
 -- OnFoo
@@ -82,7 +85,7 @@ function myReputation_OnEvent(this, event, arg1)
             (myReputation_Config.Frame > 0) and
             (myReputation_Config.Frame <= FCF_GetNumActiveChatFrames())
         ) then
-            REPUTATIONS_CHAT_FRAME = getglobal("ChatFrame"..myReputation_Config.Frame);
+            REPUTATIONS_CHAT_FRAME = _G["ChatFrame"..myReputation_Config.Frame];
         else
             REPUTATIONS_CHAT_FRAME = DEFAULT_CHAT_FRAME;
         end
@@ -222,12 +225,12 @@ function myReputation_Toggle(toggle,init)
             ReputationBar_OnClick = myReputation_ReputationBar_OnClick;
         end
         if (not lOriginal_CFAddMessage_Allgemein) then
-            lOriginal_CFAddMessage_Allgemein = getglobal("ChatFrame1").AddMessage;
-            getglobal("ChatFrame1").AddMessage = myReputation_CFAddMessage_Allgemein;
+            lOriginal_CFAddMessage_Allgemein = _G["ChatFrame1"].AddMessage;
+            _G["ChatFrame1"].AddMessage = myReputation_CFAddMessage_Allgemein;
         end
         if (not lOriginal_CFAddMessage_Kampflog) then
-            lOriginal_CFAddMessage_Kampflog = getglobal("ChatFrame2").AddMessage;
-            getglobal("ChatFrame2").AddMessage = myReputation_CFAddMessage_Kampflog;
+            lOriginal_CFAddMessage_Kampflog = _G["ChatFrame2"].AddMessage;
+            _G["ChatFrame2"].AddMessage = myReputation_CFAddMessage_Kampflog;
         end
 	
 		if (ReputationDetailFrame:GetScript("OnShow") == nil) then
@@ -252,11 +255,11 @@ function myReputation_Toggle(toggle,init)
             lOriginal_ReputationFrame_Update = nil;
         end
         if (lOriginal_CFAddMessage_Allgemein) then
-            getglobal("ChatFrame1").AddMessage = lOriginal_CFAddMessage_Allgemein;
+            _G["ChatFrame1"].AddMessage = lOriginal_CFAddMessage_Allgemein;
             lOriginal_CFAddMessage_Allgemein = nil;
         end
         if (lOriginal_CFAddMessage_Kampflog) then
-            getglobal("ChatFrame2").AddMessage = lOriginal_CFAddMessage_Kampflog;
+            _G["ChatFrame2"].AddMessage = lOriginal_CFAddMessage_Kampflog;
             lOriginal_CFAddMessage_Kampflog = nil;
         end
     end
@@ -265,10 +268,10 @@ end
 function myReputation_Toggle_Options(option)
     if (myReputation_Config[option] == true) then
         myReputation_Config[option] = false;
-        myReputation_ChatMsg(format(MYREP_MSG_FORMAT,getglobal("MYREP_MSG_"..string.upper(option)),MYREP_MSG_OFF,"."));
+        myReputation_ChatMsg(format(MYREP_MSG_FORMAT,_G["MYREP_MSG_"..string.upper(option)],MYREP_MSG_OFF,"."));
     else
         myReputation_Config[option] = true;
-        myReputation_ChatMsg(format(MYREP_MSG_FORMAT,getglobal("MYREP_MSG_"..string.upper(option)),MYREP_MSG_ON,"."));
+        myReputation_ChatMsg(format(MYREP_MSG_FORMAT,_G["MYREP_MSG_"..string.upper(option)],MYREP_MSG_ON,"."));
     end
 end
 
@@ -282,7 +285,7 @@ function myReputation_ChatFrame_Change(checked,value)  --Checked will always be 
 	) then
 		myReputation_Config.Frame = number;
 		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_FRAME,myReputation_Config.Frame,"."));
-		REPUTATIONS_CHAT_FRAME = getglobal("ChatFrame"..myReputation_Config.Frame);
+		REPUTATIONS_CHAT_FRAME = _G["ChatFrame"..myReputation_Config.Frame];
 		myReputation_RepMsg(MYREP_MSG_NOTIFY,1.0,1.0,0.0);
 	else
 		myReputation_ChatMsg(format(MYREP_MSG_INVALID_FRAME,FCF_GetNumActiveChatFrames()));
@@ -397,19 +400,20 @@ function myReputation_Frame_Update_New()
 	local factionOffset = FauxScrollFrame_GetOffset(ReputationListScrollFrame);
 
 	local gender = UnitSex("player");
+	local guildName = GetGuildInfo("player");
 	
 	local i;
 	
     for i=1, NUM_FACTIONS_DISPLAYED, 1 do
         factionIndex = factionOffset + i;
-		factionRow = getglobal("ReputationBar"..i);
-		factionBar = getglobal("ReputationBar"..i.."ReputationBar");
-		factionTitle = getglobal("ReputationBar"..i.."FactionName");
-		factionButton = getglobal("ReputationBar"..i.."ExpandOrCollapseButton");
-		factionLeftLine = getglobal("ReputationBar"..i.."LeftLine");
-		factionBottomLine = getglobal("ReputationBar"..i.."BottomLine");
-		factionStanding = getglobal("ReputationBar"..i.."ReputationBarFactionStanding");
-		factionBackground = getglobal("ReputationBar"..i.."Background");
+		factionRow = _G["ReputationBar"..i];
+		factionBar = _G["ReputationBar"..i.."ReputationBar"];
+		factionTitle = _G["ReputationBar"..i.."FactionName"];
+		factionButton = _G["ReputationBar"..i.."ExpandOrCollapseButton"];
+		factionLeftLine = _G["ReputationBar"..i.."LeftLine"];
+		factionBottomLine = _G["ReputationBar"..i.."BottomLine"];
+		factionStanding = _G["ReputationBar"..i.."ReputationBarFactionStanding"];
+		factionBackground = _G["ReputationBar"..i.."Background"];
 
 		if (factionIndex <= numFactions) then
 			name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(factionIndex);
@@ -428,6 +432,12 @@ function myReputation_Frame_Update_New()
 			) then
                 local difference = 0;
 				
+				-- guild name was not available on login
+				if (mySessionReputations[name] == nil and guildName ~= nil and name == guildName) then
+					bakName = name;
+					name = GUILD_REPUTATION;
+				end
+				
 				if (mySessionReputations[name]) then
                     -- No change in standing
                     if (mySessionReputations[name].standingID == standingID) then
@@ -444,6 +454,11 @@ function myReputation_Frame_Update_New()
                 end
 				
                 local join;
+				
+				-- guild name should be displayed
+				if (bakName ~= nil) then
+					name = bakName;
+				end
 				
 				factionCompleteInfo = factionStandingtext;
 				if (type(info) == 'table') then
@@ -523,13 +538,13 @@ function myReputation_Factions_Update()
 
 		    if (myReputations[name]) then
 			    if (standingID ~= 1) then
-					RepBefore = getglobal("FACTION_STANDING_LABEL"..standingID-1);
+					RepBefore = _G["FACTION_STANDING_LABEL"..standingID-1];
 			    end
 
-			    RepActual = getglobal("FACTION_STANDING_LABEL"..standingID);
+			    RepActual = _G["FACTION_STANDING_LABEL"..standingID];
 
 			    if (standingID ~= 8) then
-					RepNext = getglobal("FACTION_STANDING_LABEL"..standingID+1);
+					RepNext = _G["FACTION_STANDING_LABEL"..standingID+1];
 			    end
 
 			    local RawTotal = 0;
