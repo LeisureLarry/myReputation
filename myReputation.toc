@@ -1,7 +1,7 @@
 ## Interface: 40000
 
 ## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 40000 R.1 Beta2
+## Version: 40000 R.1 Beta3
 
 ## Author: Original by Egris & Karmond, Fork by Larry @ Baelgun
 ## eMail: stonehedge@gmx.de

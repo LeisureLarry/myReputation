@@ -4,7 +4,7 @@
 
 -- Basic Addon Variables
 MYREP_NAME = "myReputation";
-MYREP_VERSION = "40000 R.1 Beta2";
+MYREP_VERSION = "40000 R.1 Beta3";
 MYREP_MSG_FORMAT = "%s |cffffff00%s|r";
 MYREP_REGEXP_CHANGED = string.gsub( FACTION_STANDING_CHANGED, "'?%%[1|2]$s'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?", "%(.+)" ); 
@@ -117,12 +117,12 @@ function myReputation_OnEvent(this, event, arg1)
 			
 	        local numFactions = GetNumFactions();
 			local factionIndex;
-	        local name, standingID, barMin, barMax, barValue, isHeader;
+	        local name, standingID, barMin, barMax, barValue, isHeader, hasRep;
 	        
 	        for factionIndex=1, numFactions, 1 do
-				name, _, standingID, barMin, barMax, barValue, _, _, isHeader, _, _ = GetFactionInfo(factionIndex);
+				name, _, standingID, barMin, barMax, barValue, _, _, isHeader, _, hasRep = GetFactionInfo(factionIndex);
 
-	            if (not isHeader) then
+	            if (not isHeader or hasRep) then
 	                barMax = barMax - barMin;
 	                barValue = barValue - barMin;
 	                barMin = 0;
@@ -393,7 +393,7 @@ function myReputation_Frame_Update_New()
 	
 	local numFactions = GetNumFactions();
 	local factionIndex, factionRow, factionTitle, factionStanding, factionBar, factionButton, factionLeftLine, factionBottomLine, factionBackground, color, tooltipStanding;
-	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, isWatched, isChild;
+	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild;
 	local atWarIndicator, rightBarTexture;
     local factionCompleteInfo, factionTooltip, difference;
 
@@ -427,7 +427,7 @@ function myReputation_Frame_Update_New()
 			barMin = 0;
 
 			if (
-				(not isHeader) and
+				(not isHeader or hasRep) and
 				(factionStanding:GetText() ~= nil)
 			) then
                 local difference = 0;
@@ -531,7 +531,7 @@ function myReputation_Factions_Update()
     for factionIndex=1, numFactions, 1 do
 	    name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(factionIndex);
 
-	    if (not isHeader) then
+	    if (not isHeader or hasRep) then
 		    barMax = barMax - barMin;
 		    barValue = barValue - barMin;
 		    barMin = 0;

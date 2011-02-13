@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 40000 R1 Beta3
+* fixed super factions like Alliance Vanguard
+
 ### 40000 R1 Beta2
 * fixed session tracking for guild reputation
 * purged getglobal
