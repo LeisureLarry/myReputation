@@ -17,6 +17,9 @@ MYREP_MSG_FRAME = "Chatframe";
 MYREP_MSG_TPL = "Template";
 MYREP_MSG_DEBUG = "Debug";
 
+MYREP_INFO = "Standard View";
+MYREP_TOOLTIP = "Tooltip View";
+
 MYREP_INFO_TEXT = "Rank";
 MYREP_INFO_PERCENT = "Percent";
 MYREP_INFO_ABSOLUTE = "Absolute";

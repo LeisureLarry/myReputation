@@ -19,6 +19,9 @@ MYREP_MSG_FRAME = "Chatfenster";
 MYREP_MSG_TPL = "Ansicht";
 MYREP_MSG_DEBUG = "Debug";
 
+MYREP_INFO = "Standard-Anzeige";
+MYREP_TOOLTIP = "Tooltip-Anzeige";
+
 MYREP_INFO_TEXT = "Stufe";
 MYREP_INFO_PERCENT = "Prozent";
 MYREP_INFO_ABSOLUTE = "Absolut";
