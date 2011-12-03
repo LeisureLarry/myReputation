@@ -1,17 +1,19 @@
-## Interface: 40100
-
 ## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 40100 R.1 Beta1
+## Version: 40300 R.1 Beta1
+## Interface: 40300
+
+## Notes: Changed display of reputation window and chat messages
+## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
 
 ## Author: Original by Egris & Karmond, Fork by Larry @ Baelgun
 ## eMail: stonehedge@gmx.de
 ## URL: http://wow.curse.com/downloads/wow-addons/details/my-reputation.aspx
 
-## Notes: Changed display of reputation window and chat messages
-## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
-
 ## DefaultState: enabled
+## Dependencies:
+## OptionalDeps:
 ## SavedVariables: myReputation_Config
+## SavedVariablesPerCharacter:
 
 myReputation.xml
 myReputationOptions.xml
