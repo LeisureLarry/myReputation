@@ -4,7 +4,7 @@
 
 -- Basic Addon Variables
 MYREP_NAME = "myReputation";
-MYREP_VERSION = "40100 R.1 Beta1";
+MYREP_VERSION = "50001 R.1 Beta1";
 MYREP_MSG_FORMAT = "%s |cffffff00%s|r";
 MYREP_REGEXP_CHANGED = string.gsub( FACTION_STANDING_CHANGED, "'?%%[1|2]$s'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?", "%(.+)" ); 
