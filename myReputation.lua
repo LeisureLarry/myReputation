@@ -4,7 +4,7 @@
 
 -- Basic Addon Variables
 MYREP_NAME = "myReputation";
-MYREP_VERSION = "50001 R.1 Beta1";
+MYREP_VERSION = "50001 R.1 Beta2";
 MYREP_MSG_FORMAT = "%s |cffffff00%s|r";
 MYREP_REGEXP_CHANGED = string.gsub( FACTION_STANDING_CHANGED, "'?%%[1|2]$s'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?", "%(.+)" ); 
@@ -117,7 +117,7 @@ function myReputation_OnEvent(this, event, arg1)
 			
 	        local numFactions = GetNumFactions();
 			local factionIndex;
-	        local name, standingID, barMin, barMax, barValue, isHeader, hasRep;
+	        local name, standingID, barMin, barMax, barValue, isHeader, hasRep, _;
 	        
 	        for factionIndex=1, numFactions, 1 do
 				name, _, standingID, barMin, barMax, barValue, _, _, isHeader, _, hasRep = GetFactionInfo(factionIndex);
