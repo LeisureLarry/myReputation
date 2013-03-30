@@ -1,13 +1,13 @@
 ## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 50001 R.1 Beta2
-## Interface: 50001
+## Version: 50200 R.1 Beta1
+## Interface: 50200
 
 ## Notes: Changed display of reputation window and chat messages
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
 
 ## Author: Original by Egris & Karmond, Fork by Larry @ Baelgun
 ## eMail: stonehedge@gmx.de
-## URL: http://wow.curse.com/downloads/wow-addons/details/my-reputation.aspx
+## URL: http://www.curse.com/addons/wow/my-reputation
 
 ## DefaultState: enabled
 ## Dependencies:
