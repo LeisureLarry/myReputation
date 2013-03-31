@@ -11,7 +11,7 @@
 				myReputation_OnLoad(self);
 			</OnLoad>
 			<OnEvent>
-				myReputation_OnEvent(self, event, arg1);
+				myReputation_OnEvent(self, event, ...);
 			</OnEvent>
 		</Scripts>
 		<Frames>

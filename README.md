@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 50200 R1 Beta2
+* OnEvent cleanup
+
 ### 50200 R1 Beta1
 * Fan-Update supporting Tillers and Bizmo's Brawlpub (Thanks Kharthus)
 
