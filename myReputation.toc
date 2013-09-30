@@ -1,6 +1,6 @@
 ## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 50200 R.1 Beta2
-## Interface: 50200
+## Version: 50400 R1
+## Interface: 50400
 
 ## Notes: Changed display of reputation window and chat messages
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
