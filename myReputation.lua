@@ -29,6 +29,7 @@ myReputation_DefaultConfig.Tooltip = 'Absolute';
 myReputations = { };
 mySessionReputations = { };
 myReputation_Var = { };
+myReputation_Friend_Level = {MYREP_FRIEND_LEVEL_STRANGER, MYREP_FRIEND_LEVEL_ACQUAINTANCE, MYREP_FRIEND_LEVEL_BUDDY, MYREP_FRIEND_LEVEL_FRIEND, MYREP_FRIEND_LEVEL_GOODFRIEND, MYREP_FRIEND_LEVEL_BESTFRIEND};
 myReputation_Var.InWorld = false;
 
 -- Function Hooks
@@ -597,13 +598,13 @@ function myReputation_Factions_Update()
 		    if (myReputations[name]) then
 			    if (friendID ~= nil) then
 				    if (standingID ~= 1) then
-						RepBefore = "";
+						RepBefore = myReputation_Friend_Level[standingID-1];
 				    end
 
 				    RepActual = friendTextLevel;
 
 				    if (standingID ~= maxRank) then
-						RepNext = "";
+						RepNext = myReputation_Friend_Level[standingID+1];
 				    end
 			    else
 				    maxRank = 8;

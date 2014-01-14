@@ -40,3 +40,11 @@ MYREP_NOTIFICATION_LOST = "Your reputation with %s has decreased by %d (%d/%d)."
 MYREP_NOTIFICATION_NEEDED = "%d reputation (%d repetitions) needed until %s.";
 MYREP_NOTIFICATION_LEFT = "%d reputation (%d repetitions) left until %s.";
 MYREP_NOTIFICATION_REACHED = "%s reputation reached with %s.";
+
+--Friend Levels
+MYREP_FRIEND_LEVEL_STRANGER = "Stranger";
+MYREP_FRIEND_LEVEL_ACQUAINTANCE = "Acquaintance";
+MYREP_FRIEND_LEVEL_BUDDY = "Buddy";
+MYREP_FRIEND_LEVEL_FRIEND = "Friend";
+MYREP_FRIEND_LEVEL_GOODFRIEND = "Good Friend";
+MYREP_FRIEND_LEVEL_BESTFRIEND = "Best Friend";

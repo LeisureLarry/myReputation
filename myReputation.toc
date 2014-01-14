@@ -1,5 +1,5 @@
 ## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 50400 R1
+## Version: 50400 R2
 ## Interface: 50400
 
 ## Notes: Changed display of reputation window and chat messages
