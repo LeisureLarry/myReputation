@@ -1,19 +1,14 @@
-## Title: Pearl - [my] |cFFFFFFFFReputation|r
-## Version: 50400 R2
 ## Interface: 50400
-
-## Notes: Changed display of reputation window and chat messages
-## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen
-
-## Author: Original by Egris & Karmond, Fork by Larry @ Baelgun
-## eMail: stonehedge@gmx.de
-## URL: http://www.curse.com/addons/wow/my-reputation
-
-## DefaultState: enabled
-## Dependencies:
-## OptionalDeps:
+## Title: myReputation |cff00aa0050400R3|r
+## Notes: Changed display of reputation window and chat messages.
+## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
+## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun
 ## SavedVariables: myReputation_Config
-## SavedVariablesPerCharacter:
+## Dependencies:
+## Version: 50400R3
+## DefaultState: enabled
+## X-Email: contact@titanpanel.org
+## X-WoWI-ID: 22707
 
 myReputation.xml
 myReputationOptions.xml

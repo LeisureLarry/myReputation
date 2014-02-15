@@ -43,4 +43,12 @@ MYREP_NOTIFICATION_NEEDED = "Noch %d Ruf (%d Wiederholungen) f\195\188r %s ben\1
 MYREP_NOTIFICATION_LEFT = "Noch %d Ruf (%d Wiederholungen) \195\188brig bevor %s erreicht wird.";
 MYREP_NOTIFICATION_REACHED = "%s bei %s erreicht.";
 
+--Friend Levels
+MYREP_FRIEND_LEVEL_STRANGER = "Stranger";
+MYREP_FRIEND_LEVEL_ACQUAINTANCE = "Acquaintance";
+MYREP_FRIEND_LEVEL_BUDDY = "Buddy";
+MYREP_FRIEND_LEVEL_FRIEND = "Friend";
+MYREP_FRIEND_LEVEL_GOODFRIEND = "Good Friend";
+MYREP_FRIEND_LEVEL_BESTFRIEND = "Best Friend";
+MYREP_FRIEND_LEVEL_PAL = "Pal";
 end

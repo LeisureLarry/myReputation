@@ -582,6 +582,7 @@ function myReputation_Factions_Update()
 		    local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
 		    local currentRank, maxRank = GetFriendshipReputationRanks(factionID);
 		    if (friendID ~= nil) then
+--DEFAULT_CHAT_FRAME:AddMessage("Faction: " .. name .. " - " .. factionID)
 			    standingID = currentRank;
 			    if ( nextFriendThreshold ) then
 				    barMin, barMax, barValue = friendThreshold, nextFriendThreshold, friendRep;
@@ -606,6 +607,10 @@ function myReputation_Factions_Update()
 				    if (standingID ~= maxRank) then
 						RepNext = myReputation_Friend_Level[standingID+1];
 				    end
+				    
+				    if (factionID == 1358 and standingID == 1) then
+				          RepNext = MYREP_FRIEND_LEVEL_PAL;
+				    end 
 			    else
 				    maxRank = 8;
 				    if (standingID ~= 1) then

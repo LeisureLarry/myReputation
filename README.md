@@ -21,6 +21,12 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 50400 R3
+* quick and dirty fix for friends reputation - part 2
+
+### 50400 R2
+* quick and dirty fix for friends reputation
+
 ### 50400 R1
 * TOC update for 5.4 patch
 
