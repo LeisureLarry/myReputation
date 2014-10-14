@@ -1,11 +1,11 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: myReputation |cff00aa0050400R3|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
 ## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 50400R3
+## Version: 60000R1
 ## DefaultState: enabled
 ## X-Email: contact@titanpanel.org
 ## X-WoWI-ID: 22707
