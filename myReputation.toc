@@ -1,11 +1,11 @@
 ## Interface: 60100
-## Title: myReputation |cff00aa0060100R1|r
+## Title: myReputation |cff00aa0060100R2|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
 ## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 60100R1
+## Version: 60100R2
 ## DefaultState: enabled
 ## X-Email: contact@titanpanel.org
 ## X-WoWI-ID: 22707
