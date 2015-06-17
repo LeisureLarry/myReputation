@@ -551,7 +551,12 @@ function myReputation_Factions_Update()
 			-- check if this is a friendship faction 
 			local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
 			local currentRank, maxRank = GetFriendshipReputationRanks(factionID);
-			local IsFollower = maxRank and 3;
+			local IsFollower;
+			if (maxRank == 3) then
+				IsFollower = true;
+			else
+				IsFollower = false;
+			end
 			if (friendID ~= nil) then
 				--DEFAULT_CHAT_FRAME:AddMessage("factionID/friendID/IsFollower: " .. name .. " - " .. factionID .. "/" .. friendID .. "/" .. IsFollower)
 				standingID = currentRank;
