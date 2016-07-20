@@ -558,7 +558,7 @@ function myReputation_Factions_Update()
 				IsFollower = false;
 			end
 			if (friendID ~= nil) then
-				--DEFAULT_CHAT_FRAME:AddMessage("factionID/friendID/IsFollower: " .. name .. " - " .. factionID .. "/" .. friendID .. "/" .. IsFollower)
+				--DEFAULT_CHAT_FRAME:AddMessage("factionID/friendID/IsFollower/currentRank/maxRank: " .. name .. " - " .. factionID .. "/" .. friendID .. "/" .. tostring(IsFollower) .. "/" .. currentRank .. "/" .. maxRank);
 				standingID = currentRank;
 				if ( nextFriendThreshold ) then
 					barMin, barMax, barValue = friendThreshold, nextFriendThreshold, friendRep;
@@ -607,8 +607,10 @@ function myReputation_Factions_Update()
 
 				local RawTotal = 0;
 
+				--DEFAULT_CHAT_FRAME:AddMessage("myReputations[name].standingID/standingID: " .. myReputations[name].standingID .. "/" .. standingID);
 				-- No change in standing
 				if (myReputations[name].standingID == standingID) then
+				--DEFAULT_CHAT_FRAME:AddMessage("No change in standing");
 					local difference = barValue - myReputations[name].barValue;
 
 					-- Reputation went up
@@ -643,6 +645,7 @@ function myReputation_Factions_Update()
 
 				-- Reputation went up and reached next standing
 				elseif (myReputations[name].standingID < standingID) then
+				--DEFAULT_CHAT_FRAME:AddMessage("Reputation went up and reached next standing");
 					RepRemains = barMax - barValue;
 					RawTotal = barValue + myReputations[name].barMax - myReputations[name].barValue;
 					myReputation_RepMsg(format(MYREP_NOTIFICATION_GAINED,name,RawTotal,barValue,barMax), 0.5, 0.5, 1.0);
@@ -663,6 +666,7 @@ function myReputation_Factions_Update()
 
 				-- Reputation went down and reached next standing
 				else
+				--DEFAULT_CHAT_FRAME:AddMessage("Reputation went down and reached next standing");
 					RepRemains = barValue;
 					RawTotal = barMax - barValue + myReputations[name].barValue;
 					myReputation_RepMsg(format(MYREP_NOTIFICATION_LOST,name,RawTotal,barValue,barMax), 0.5, 0.5, 1.0);

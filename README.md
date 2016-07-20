@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 70000 R1
+* just a toc update
+
 ### 60200 R1
 * TOC update for 6.2.0 patch
 
