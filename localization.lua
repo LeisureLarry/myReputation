@@ -24,6 +24,7 @@ MYREP_INFO_TEXT = "Rank";
 MYREP_INFO_PERCENT = "Percent";
 MYREP_INFO_ABSOLUTE = "Absolute";
 MYREP_INFO_DIFFERENCE = "Session";
+MYREP_INFO_PARA_REWARDS = "Rewards";
 
 MYREP_MSG_NOTIFY = "Reputation notification now set to this frame.";
 MYREP_MSG_INVALID_FRAME = MYREP_MSG_FRAME.." is invalid. Valid values: 1-%d.";

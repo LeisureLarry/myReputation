@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 70200 R2
+* support for paragon reputation added
+
 ### 70200 R1
 * just a toc update
 

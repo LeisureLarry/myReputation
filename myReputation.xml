@@ -115,6 +115,18 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<FontString name="$parentParagonRewards" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="140" y="0"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentDifference" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 				<Texture file="Interface\PaperDollInfoFrame\UI-Character-Reputation-DetailBackground">
 					<Size>
 						<AbsDimension x="211" y="128"/>

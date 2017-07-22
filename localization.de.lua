@@ -26,6 +26,7 @@ MYREP_INFO_TEXT = "Stufe";
 MYREP_INFO_PERCENT = "Prozent";
 MYREP_INFO_ABSOLUTE = "Absolut";
 MYREP_INFO_DIFFERENCE = "Session";
+MYREP_INFO_PARA_REWARDS = "Belohnungen";
 
 MYREP_MSG_NOTIFY = "Reputations-Meldungen erscheinen nun in diesem Chatfenster.";
 MYREP_MSG_INVALID_FRAME = MYREP_MSG_FRAME.." ist ung\195\188ltig. G\195\188ltige Werte: 1-%d.";
@@ -43,12 +44,4 @@ MYREP_NOTIFICATION_NEEDED = "Noch %d Ruf (%d Wiederholungen) f\195\188r %s ben\1
 MYREP_NOTIFICATION_LEFT = "Noch %d Ruf (%d Wiederholungen) \195\188brig bevor %s erreicht wird.";
 MYREP_NOTIFICATION_REACHED = "%s bei %s erreicht.";
 
---Friend Levels
-MYREP_FRIEND_LEVEL_STRANGER = "Stranger";
-MYREP_FRIEND_LEVEL_ACQUAINTANCE = "Acquaintance";
-MYREP_FRIEND_LEVEL_BUDDY = "Buddy";
-MYREP_FRIEND_LEVEL_FRIEND = "Friend";
-MYREP_FRIEND_LEVEL_GOODFRIEND = "Good Friend";
-MYREP_FRIEND_LEVEL_BESTFRIEND = "Best Friend";
-MYREP_FRIEND_LEVEL_PAL = "Pal";
 end
