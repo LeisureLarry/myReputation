@@ -1,11 +1,11 @@
-## Interface: 70200
-## Title: myReputation |cff00aa0070200R2|r
+## Interface: 70300
+## Title: myReputation |cff00aa0070300R1|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
 ## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 70200R2
+## Version: 70300R1
 ## DefaultState: enabled
 
 myReputation.xml

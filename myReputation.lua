@@ -11,6 +11,7 @@ MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?",
 MYREP_REGEXP_DECREASED_GENERIC = string.gsub( FACTION_STANDING_DECREASED_GENERIC, "'?%%[s|d]'?", "%(.+)" );
 MYREP_REGEXP_INCREASED = string.gsub( FACTION_STANDING_INCREASED, "'?%%[s|d]'?", "%(.+)" );
 MYREP_REGEXP_INCREASED_GENERIC = string.gsub( FACTION_STANDING_INCREASED_GENERIC, "'?%%[s|d]'?", "%(.+)" );
+MYREP_REGEXP_INCREASED_ACH_BONUS = string.gsub( string.gsub( FACTION_STANDING_INCREASED_ACH_BONUS, "%(.+%)", ".+"), "'?+?%%%.?1?[s|d|f]'?", "%(.+)" );
 
 -- Configuration Variables and their Standard Values
 myReputation_Config = { };
@@ -63,7 +64,9 @@ function myReputation_OnLoad(self)
 
 	if (DEFAULT_CHAT_FRAME) then
 		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_VERSION));
+		myReputation_ChatMsg("Pattern: " .. MYREP_REGEXP_INCREASED_ACH_BONUS);
 	end
+    
 end
 
 function myReputation_OnEvent(self, event, ...)
@@ -311,12 +314,13 @@ function myReputation_CFAddMessage_Allgemein(self, msg, ...)
 		string.find(msg, MYREP_REGEXP_DECREASED) or
 		string.find(msg, MYREP_REGEXP_DECREASED_GENERIC) or
 		string.find(msg, MYREP_REGEXP_INCREASED) or
+		string.find(msg, MYREP_REGEXP_INCREASED_ACH_BONUS) or
 		string.find(msg, MYREP_REGEXP_INCREASED_GENERIC)
 		)
-		) then
-			if (myReputation_Config.Debug == true) then
-				myReputation_RepMsg("Blizzard Meldung in Frame 1 abgefangen");
-			end
+	) then
+		if (myReputation_Config.Debug == true) then
+			myReputation_RepMsg("Blizzard Meldung in Frame 1 abgefangen");
+		end
 	else
 		lOriginal_CFAddMessage_Allgemein(self, msg, ...);
 	end
@@ -331,9 +335,10 @@ function myReputation_CFAddMessage_Kampflog(self, msg, ...)
 		string.find(msg, MYREP_REGEXP_DECREASED) or
 		string.find(msg, MYREP_REGEXP_DECREASED_GENERIC) or
 		string.find(msg, MYREP_REGEXP_INCREASED) or
+		string.find(msg, MYREP_REGEXP_INCREASED_ACH_BONUS) or
 		string.find(msg, MYREP_REGEXP_INCREASED_GENERIC)
 		)
-		) then
+	) then
 		if (myReputation_Config.Debug == true) then
 			myReputation_RepMsg("Blizzard Meldung in Frame 2 abgefangen");
 		end
@@ -355,12 +360,12 @@ function myReputation_ReputationBar_OnClick(self)
 		local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID = GetFactionInfo(self.index);
 		local color = FACTION_BAR_COLORS[standingID];
 		local text;
-        local paraRewards = 0;
+		local paraRewards = 0;
 
 		-- check if this is a friendship faction 
 		local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
 		local isParagon = C_Reputation.IsFactionParagon(factionID);
-        local currentRank = GetFriendshipReputationRanks(factionID);
+		local currentRank = GetFriendshipReputationRanks(factionID);
 		if (friendID ~= nil) then
 			text = friendTextLevel;
 			standingID = currentRank;
@@ -772,8 +777,6 @@ function myReputation_Factions_Update()
 			myReputations[name].standingID = standingID;
 			myReputations[name].barValue = barValue;
 			myReputations[name].barMax = barMax;
-			-- myReputations[name].atWarWith = atWarWith;
-            -- myReputations[name].isParagon = isParagon;
 		end
 	end
 end
