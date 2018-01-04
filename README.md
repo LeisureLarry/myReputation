@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 70300 R2
+* fixed factionID errors
+
 ### 70300 R1
 * added support for filtering of bonus exp increases
 
