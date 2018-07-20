@@ -1,11 +1,11 @@
-## Interface: 70300
-## Title: myReputation |cff00aa0070300R2|r
+## Interface: 80000
+## Title: myReputation |cff00aa0080000R1|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
 ## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 70300R2
+## Version: 80000R1
 ## DefaultState: enabled
 ## X-Email: contact@titanpanel.org
 ## X-WoWI-ID: 22707

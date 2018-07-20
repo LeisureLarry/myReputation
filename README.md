@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 80000 R1
+* TOC update for 8.0
+
 ### 70300 R2
 * fixed factionID errors
 
