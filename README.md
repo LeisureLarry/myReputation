@@ -21,6 +21,11 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 90001 R1 Beta1
+* fixed Shadowland backdrop issues in reputation detail frame and options
+* fixed reputation frame tooltip
+* toc update
+
 ### 80000 R1
 * TOC update for 8.0
 

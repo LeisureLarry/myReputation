@@ -1,14 +1,12 @@
-## Interface: 80000
-## Title: myReputation |cff00aa0080000R1|r
+## Interface: 90001
+## Title: myReputation |cff00aa0090001 R1 Beta1|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
-## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun
+## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun [DE]
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 80000R1
+## Version: 90001 R1 Beta1
 ## DefaultState: enabled
-## X-Email: contact@titanpanel.org
-## X-WoWI-ID: 22707
 
 myReputation.xml
 myReputationOptions.xml

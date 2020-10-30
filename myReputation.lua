@@ -64,9 +64,7 @@ function myReputation_OnLoad(self)
 
 	if (DEFAULT_CHAT_FRAME) then
 		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_VERSION));
-		myReputation_ChatMsg("Pattern: " .. MYREP_REGEXP_INCREASED_ACH_BONUS);
 	end
-    
 end
 
 function myReputation_OnEvent(self, event, ...)
@@ -83,6 +81,17 @@ function myReputation_OnEvent(self, event, ...)
 				myReputation_Config[i] = nil;
 			end
 		end
+		
+		-- SHADOWLANDS-FIX
+		myReputation_ReputationDetailFrame.backdropInfo = {
+			bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+			edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+			tile = true,
+			tileSize = 24,
+			edgeSize = 24,
+			insets = { left = 6, right = 6, top = 6, bottom = 6, },
+		};
+		myReputation_ReputationDetailFrame:ApplyBackdrop();
 	end
 	
 	-- Fired just before PLAYER_ENTERING_WORLD on login and UI Reload
@@ -591,7 +600,7 @@ function myReputation_Frame_Update_New()
 					end
 					factionStanding:SetText(factionCompleteInfo);
 					factionRow.standingText = factionCompleteInfo;
-					factionRow.tooltip = HIGHLIGHT_FONT_COLOR_CODE..factionTooltip..FONT_COLOR_CODE_CLOSE;
+					factionRow.rolloverText = HIGHLIGHT_FONT_COLOR_CODE..factionTooltip..FONT_COLOR_CODE_CLOSE;
 				end
 			end
 		end

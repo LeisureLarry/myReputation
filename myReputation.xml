@@ -31,7 +31,7 @@
 		</Frames>
 	</Frame>
 
-	<Frame name="myReputation_ReputationDetailFrame" enableMouse="true" hidden="true">
+	<Frame name="myReputation_ReputationDetailFrame" enableMouse="true" hidden="true" inherits="BackdropTemplate">
 		<Size>
 			<AbsDimension x="172" y="143"/>
 		</Size>
@@ -42,17 +42,6 @@
 				</Offset>
 			</Anchor>
 		</Anchors>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets>
-				<AbsInset left="11" right="12" top="12" bottom="11"/>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="32"/>
-			</EdgeSize>
-		</Backdrop>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentDetails" inherits="GameFontHighlight" justifyH="LEFT" text="MYREP_MSG_MORE">
