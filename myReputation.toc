@@ -1,11 +1,11 @@
 ## Interface: 90001
-## Title: myReputation |cff00aa0090001 R1 Beta1|r
+## Title: myReputation |cff00aa0090001.1 Beta2|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
-## Author: HonorGoG; original by Egris & Karmond; Fork by Larry @ Baelgun [DE]
+## Author: Original by Egris & Karmond; Fork by Larry @ Baelgun [DE]; Maintainers HonorGoG/Kharthus
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 90001 R1 Beta1
+## Version: 90001.1 Beta2
 ## DefaultState: enabled
 
 myReputation.xml
