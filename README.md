@@ -21,6 +21,9 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 60200 R1
+* TOC update for 6.2.0 patch
+
 ### 60100 R3
 * quick and dirty fix for follower reputation - part 2
 
