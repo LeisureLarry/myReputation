@@ -8,10 +8,10 @@
 	<Frame name="myReputation_Frame" hidden="false" parent="UIParent">
 		<Scripts>
 			<OnLoad>
-				myReputation_OnLoad();
+				myReputation_OnLoad(self);
 			</OnLoad>
 			<OnEvent>
-				myReputation_OnEvent(event, arg1);
+				myReputation_OnEvent(self, event, arg1);
 			</OnEvent>
 		</Scripts>
 		<Frames>
@@ -28,17 +28,17 @@
 				</Anchors>
 				<FontString inherits="NumberFontNormalHuge" justifyH="CENTER"></FontString>
 			</MessageFrame>
-		 </Frames>
+		</Frames>
 	</Frame>
 
 	<Frame name="myReputation_ReputationDetailFrame" enableMouse="true" hidden="true">
 		<Size>
-			<AbsDimension x="192" y="143"/>
+			<AbsDimension x="172" y="143"/>
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="ReputationFrame" relativePoint="TOPRIGHT">
 				<Offset>
-					<AbsDimension x="-30" y="-208"/>
+					<AbsDimension x="0" y="-188"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
@@ -57,7 +57,7 @@
 			<Layer level="ARTWORK">
 				<FontString name="$parentDetails" inherits="GameFontHighlight" justifyH="LEFT" text="MYREP_MSG_MORE">
 					<Size>
-						<AbsDimension x="170" y="0"/>
+						<AbsDimension x="140" y="0"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
@@ -69,7 +69,7 @@
 				</FontString>
 				<FontString name="$parentText" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size>
-						<AbsDimension x="170" y="0"/>
+						<AbsDimension x="140" y="0"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentDetails" relativePoint="BOTTOMLEFT">
@@ -81,7 +81,7 @@
 				</FontString>
 				<FontString name="$parentAbsolute" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size>
-						<AbsDimension x="170" y="0"/>
+						<AbsDimension x="140" y="0"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentText" relativePoint="BOTTOMLEFT">
@@ -93,7 +93,7 @@
 				</FontString>
 				<FontString name="$parentPercent" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size>
-						<AbsDimension x="170" y="0"/>
+						<AbsDimension x="140" y="0"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentAbsolute" relativePoint="BOTTOMLEFT">
@@ -105,7 +105,7 @@
 				</FontString>
 				<FontString name="$parentDifference" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size>
-						<AbsDimension x="170" y="0"/>
+						<AbsDimension x="140" y="0"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentPercent" relativePoint="BOTTOMLEFT">
@@ -117,7 +117,7 @@
 				</FontString>
 				<Texture file="Interface\PaperDollInfoFrame\UI-Character-Reputation-DetailBackground">
 					<Size>
-						<AbsDimension x="236" y="128"/>
+						<AbsDimension x="211" y="128"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">

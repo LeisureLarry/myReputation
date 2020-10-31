@@ -4,7 +4,7 @@
 
 -- Basic Addon Variables
 MYREP_NAME = "myReputation";
-MYREP_VERSION = "30300 R.1 Beta3";
+MYREP_VERSION = "40000 R.1 Beta1";
 MYREP_MSG_FORMAT = "%s |cffffff00%s|r";
 MYREP_REGEXP_CHANGED = string.gsub( FACTION_STANDING_CHANGED, "'?%%[1|2]$s'?", "%(.+)" ); 
 MYREP_REGEXP_DECREASED = string.gsub( FACTION_STANDING_DECREASED, "'?%%[s|d]'?", "%(.+)" ); 
@@ -42,7 +42,7 @@ local lOriginal_CFAddMessage_Kampflog;
 -- OnFoo
 ----------------------------------------------------------------------
 
-function myReputation_OnLoad()
+function myReputation_OnLoad(this)
     --Slash command
     SlashCmdList["MYREPCOMMAND"] = myReputation_SlashHandler;
     SLASH_MYREPCOMMAND1 = "/myreputation";
@@ -61,7 +61,7 @@ function myReputation_OnLoad()
     end
 end
 
-function myReputation_OnEvent(event, arg1)
+function myReputation_OnEvent(this, event, arg1)
 	if (event == "ADDON_LOADED") then
 		myReputation_AddOptionMt(myReputation_Config, myReputation_DefaultConfig);
 

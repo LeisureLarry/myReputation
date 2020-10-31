@@ -19,10 +19,10 @@ MYREP_MSG_FRAME = "Chatfenster";
 MYREP_MSG_TPL = "Ansicht";
 MYREP_MSG_DEBUG = "Debug";
 
-MYREP_INFO_TEXT = "Bezeichnung";
+MYREP_INFO_TEXT = "Stufe";
 MYREP_INFO_PERCENT = "Prozent";
 MYREP_INFO_ABSOLUTE = "Absolut";
-MYREP_INFO_DIFFERENCE = "Unterschied (Session)";
+MYREP_INFO_DIFFERENCE = "Session";
 
 MYREP_MSG_NOTIFY = "Reputations-Meldungen erscheinen nun in diesem Chatfenster.";
 MYREP_MSG_INVALID_FRAME = MYREP_MSG_FRAME.." ist ung\195\188ltig. G\195\188ltige Werte: 1-%d.";

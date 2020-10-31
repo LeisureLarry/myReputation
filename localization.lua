@@ -17,10 +17,10 @@ MYREP_MSG_FRAME = "Chatframe";
 MYREP_MSG_TPL = "Template";
 MYREP_MSG_DEBUG = "Debug";
 
-MYREP_INFO_TEXT = "Standing Text";
+MYREP_INFO_TEXT = "Rank";
 MYREP_INFO_PERCENT = "Percent";
 MYREP_INFO_ABSOLUTE = "Absolute";
-MYREP_INFO_DIFFERENCE = "Difference (session)";
+MYREP_INFO_DIFFERENCE = "Session";
 
 MYREP_MSG_NOTIFY = "Reputation notification now set to this frame.";
 MYREP_MSG_INVALID_FRAME = MYREP_MSG_FRAME.." is invalid. Valid values: 1-%d.";

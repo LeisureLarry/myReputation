@@ -21,6 +21,10 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 40000 R1 Beta1
+* fixed this/self problem
+* fixed position of detail window
+
 ### 30300 R1 Beta1
 * the addon is now using blizzards addons gui for the settings
 * the theme settings aren't available any longer supported
