@@ -96,17 +96,12 @@ function myReputation_OnEvent(self, event, ...)
 	
 	-- Fired just before PLAYER_ENTERING_WORLD on login and UI Reload
 	if ((event == "PLAYER_LOGIN") or (event == "PLAYER_ENTERING_WORLD")) then
-		if ((myReputation_Config.Frame > 0) and (myReputation_Config.Frame <= FCF_GetNumActiveChatFrames()) ) then
-			REPUTATIONS_CHAT_FRAME = _G["ChatFrame"..myReputation_Config.Frame];
-		else
-			REPUTATIONS_CHAT_FRAME = DEFAULT_CHAT_FRAME;
-		end
 		myReputation_Toggle(myReputation_Config.Enabled,true);
 	end
 
 	-- Register Ingame Events
 	if (event == "PLAYER_ENTERING_WORLD") then
-        self:RegisterEvent("UPDATE_FACTION");
+		self:RegisterEvent("UPDATE_FACTION");
 	end
 
 	-- Event UPDATE_FACTION
@@ -122,7 +117,8 @@ function myReputation_OnEvent(self, event, ...)
 	-- Events which are usable to get numFactions > 0
 	if ((event == "PLAYER_ENTERING_WORLD") or (event == "UNIT_AURA") or (event == "PLAYER_TARGET_CHANGED")) then
 		if (myReputation_Config.Debug == true) then
-			myReputation_ChatMsg("MyRep: Entering, ChatFrames: "..FCF_GetNumActiveChatFrames()..", NumFactions: "..GetNumFactions());
+			myReputation_ChatMsg("MyRep: Entering, ChatFrames: "..myReputation_CountUsableChatFrames()..", NumFactions: "..GetNumFactions());
+			myReputation_RepMsg("Current reputation chat frame",1.0,1.0,0.0);
 		end
 
 		-- Save Session StartRep
@@ -130,32 +126,17 @@ function myReputation_OnEvent(self, event, ...)
 			local numFactions = GetNumFactions();
 			local factionIndex;
 			local name, standingID, barMin, barMax, barValue, isHeader, hasRep, factionID, hasBonusRepGain, canBeLFGBonus, _;
+			local isParagon, paraRewards, factionStandingText, isFollower;
 			for factionIndex=1, numFactions, 1 do
 				name, _, standingID, barMin, barMax, barValue, _, _, isHeader, _, hasRep, _, _, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex);
 				if (not isHeader or hasRep) then
-					-- check if this is a friendship faction 
-					local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
-					local isParagon = C_Reputation.IsFactionParagon(factionID);
-					local currentRank = GetFriendshipReputationRanks(factionID);
-					if (isParagon and barMin == 42000 and barMax == 42000 and barValue == 42000) then
-						local paraValue, paraThreshold, paraQuestId, paraRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
-						local paraRewards = math.floor(paraValue / paraThreshold);
-						standingID = standingID + paraRewards;
-						barMin = 0;
-						barMax = paraThreshold;
-						barValue = paraValue - (paraRewards * paraThreshold);
-					elseif (friendID ~= nil) then
-						standingID = currentRank;
-						if ( nextFriendThreshold ) then
-							barMin, barMax, barValue = friendThreshold, nextFriendThreshold, friendRep;
-						else
-							-- max rank
-							barMin, barMax, barValue = friendThreshold, friendMaxRep, friendRep;
-						end
-					end
+					barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+					
+					--Normalize Values
 					barMax = barMax - barMin;
 					barValue = barValue - barMin;
 					barMin = 0;
+					
 					mySessionReputations[name] = { };
 					mySessionReputations[name].standingID = standingID;
 					mySessionReputations[name].barValue = barValue;
@@ -187,7 +168,37 @@ end
 
 -- Send Message to Reputation Chat Frame
 function myReputation_RepMsg(message,r,g,b)
-	REPUTATIONS_CHAT_FRAME:AddMessage(message,r,g,b);
+	if ((myReputation_Config.Frame > 0) and (myReputation_Config.Frame <= myReputation_CountUsableChatFrames()) ) then
+		local usableChatFrame = myReputation_GetUsableChatFrames();
+		_G["ChatFrame"..usableChatFrame[myReputation_Config.Frame]]:AddMessage(message, r,g,b);
+	else
+		DEFAULT_CHAT_FRAME:AddMessage(message, r,g,b);
+	end
+end
+
+function myReputation_CountUsableChatFrames()
+	return table.getn(myReputation_GetUsableChatFrames());
+end
+
+-- Not all Chat Frames are usable as Reputation Chat Frame
+function myReputation_GetUsableChatFrames()
+	local dockedList = { };
+	for i=1, NUM_CHAT_WINDOWS do
+		local chatFrame = _G["ChatFrame"..i];
+		local name, fontSize, r, g, b, a, shown, locked = FCF_GetChatWindowInfo(i);
+
+		if (chatFrame) then
+			if (chatFrame.isDocked and (name ~= COMBAT_LOG)) then
+				table.insert(dockedList, chatFrame:GetID());
+			end
+		end
+	end
+	
+	if (myReputation_Config.Debug == true) then
+		myReputation_ChatMsg(table.concat(dockedList,","));
+	end
+
+	return dockedList;
 end
 
 -- Send Message to Splash Frame
@@ -237,19 +248,25 @@ end
 
 -- Toggles
 function myReputation_Toggle(toggle,init)
+	if (myReputation_Config.Debug == true) then
+		local toggleText;
+		if (toggle) then toggleText = "enabled"; else toggleText = "disabled"; end
+		myReputation_ChatMsg("MyRep: Toggle "..toggleText);
+	end
+		
 	myReputation_Config.Enabled = toggle;
 	if (toggle == true) then
 		--Hook
-		if (not lOriginal_ReputationFrame_Update) then
+		if (not lOriginal_ReputationFrame_InitReputationRow) then
 			if (init ~= true) then
 				myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_NAME,MYREP_MSG_ON,"."));
 			end
-			lOriginal_ReputationFrame_Update = ReputationFrame_Update;
-			ReputationFrame_Update = myReputation_Frame_Update_New;
+			lOriginal_ReputationFrame_InitReputationRow = ReputationFrame_InitReputationRow;
+			ReputationFrame_InitReputationRow = myReputation_ReputationFrame_InitReputationRow;
 		end
-		if (not lOriginal_ReputationBar_OnClick) then
-			lOriginal_ReputationBar_OnClick = ReputationBar_OnClick;
-			ReputationBar_OnClick = myReputation_ReputationBar_OnClick;
+		if (not lOriginal_ReputationBarMixin_OnClick) then
+			lOriginal_ReputationBarMixin_OnClick = ReputationBarMixin.OnClick;
+			ReputationBarMixin.OnClick = myReputation_ReputationBarMixin_OnClick;
 		end
 		if (not lOriginal_CFAddMessage_Allgemein) then
 			lOriginal_CFAddMessage_Allgemein = _G["ChatFrame1"].AddMessage;
@@ -271,6 +288,8 @@ function myReputation_Toggle(toggle,init)
 				myReputation_ReputationDetailFrame:Hide();
 			end)
 		end
+		
+		myReputation_Factions_Update();
 	else
 		--Unhook
 		if (lOriginal_ReputationFrame_Update) then
@@ -303,13 +322,12 @@ end
 
 function myReputation_ChatFrame_Change(checked,value)  --Checked will always be 0
 	local number = tonumber(value);
-	if ((value ~= nil) and (number > 0) and (number ~= 2) and (number <= FCF_GetNumActiveChatFrames())) then
+	if ((value ~= nil) and (number > 0) and (number ~= 2) and (number <= myReputation_CountUsableChatFrames())) then
 		myReputation_Config.Frame = math.floor(number);
 		myReputation_ChatMsg(format(MYREP_MSG_FORMAT,MYREP_MSG_FRAME,myReputation_Config.Frame,"."));
-		REPUTATIONS_CHAT_FRAME = _G["ChatFrame"..myReputation_Config.Frame];
 		myReputation_RepMsg(MYREP_MSG_NOTIFY,1.0,1.0,0.0);
 	else
-		myReputation_ChatMsg(format(MYREP_MSG_INVALID_FRAME,FCF_GetNumActiveChatFrames()));
+		myReputation_ChatMsg(format(MYREP_MSG_INVALID_FRAME,myReputation_CountUsableChatFrames()));
 	end
 end
 
@@ -356,56 +374,20 @@ function myReputation_CFAddMessage_Kampflog(self, msg, ...)
 	end
 end
 
--- extra Detailframe of reputation frame
-function myReputation_ReputationBar_OnClick(self)
-	local gender = UnitSex("player");
-	lOriginal_ReputationBar_OnClick(self);
-	
+-- Extra Detail Frame of Reputation Frame
+function myReputation_ReputationBarMixin_OnClick(self, down)
 	if (myReputation_Config.Debug == true) then
-		myReputation_RepMsg("ReputationBar_OnClick Faction "..self.index);
+		myReputation_ChatMsg("ReputationBarMixin_OnClick Faction "..self.index);
 	end
 	
-	if (ReputationDetailFrame:IsVisible()) then
+	lOriginal_ReputationBarMixin_OnClick(self, down);
+	
+	if (ReputationDetailFrame:IsShown()) then
 		local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID = GetFactionInfo(self.index);
-		local color = FACTION_BAR_COLORS[standingID];
-		local text;
-		local paraRewards = 0;
+		local isParagon, paraRewards, factionStandingText, isFollower;
 
 		if (not isHeader or hasRep) then
-			-- check if this is a friendship faction 
-			local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
-			local isParagon = C_Reputation.IsFactionParagon(factionID);
-			local currentRank = GetFriendshipReputationRanks(factionID);
-			if (friendID ~= nil) then
-				text = friendTextLevel;
-				standingID = currentRank;
-				if ( nextFriendThreshold ) then
-					barMin, barMax, barValue = friendThreshold, nextFriendThreshold, friendRep;
-				else
-					-- max rank
-					barMin, barMax, barValue = friendThreshold, friendMaxRep, friendRep;
-				end
-			else
-				text = GetText("FACTION_STANDING_LABEL"..standingID, gender);
-			end
-
-			if (isParagon and barMin == 42000 and barMax == 42000 and barValue == 42000) then
-				local paraValue, paraThreshold, paraQuestId, paraRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
-				paraRewards = math.floor(paraValue / paraThreshold);
-				text = "Paragon";
-				barMin = 0;
-				barMax = paraThreshold;
-				barValue = paraValue - (paraRewards * paraThreshold);
-				standingID = standingID + paraRewards;
-				if (myReputation_Config.Debug == true) then
-					myReputation_ChatMsg(name..' '..paraValue..' '..paraThreshold..' '..paraRewards);
-				end
-			end
-
-			--Normalize Values
-			barMax = barMax - barMin;
-			barValue = barValue - barMin;
-			barMin = 0;
+			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 
 			local absolute = barValue.."/"..barMax;
 			local percent = format("%.1f%%", barValue / barMax * 100);
@@ -431,10 +413,12 @@ function myReputation_ReputationBar_OnClick(self)
 				percent = "-";
 				difference = "-";
 			end
+		
+			local color = FACTION_BAR_COLORS[standingID];
 
 			myReputation_ReputationDetailFrameDetails:SetTextColor(color.r, color.g, color.b);
 			myReputation_ReputationDetailFrameText:SetText(
-				format(MYREP_MSG_FORMAT, MYREP_INFO_TEXT..":", text)
+				format(MYREP_MSG_FORMAT, MYREP_INFO_TEXT..":", factionStandingText)
 			);
 			myReputation_ReputationDetailFrameAbsolute:SetText(
 				format(MYREP_MSG_FORMAT, MYREP_INFO_ABSOLUTE..":", absolute)
@@ -447,216 +431,203 @@ function myReputation_ReputationBar_OnClick(self)
 			);
 			if (paraRewards > 0) then
 				myReputation_ReputationDetailFrameParagonRewards:SetText(
-				format(MYREP_MSG_FORMAT, MYREP_INFO_PARA_REWARDS..":", paraRewards)
+					format(MYREP_MSG_FORMAT, MYREP_INFO_PARA_REWARDS..":", paraRewards)
 				);
+			else
+				myReputation_ReputationDetailFrameParagonRewards:SetText("");
 			end
 		end
 	end
 end
 
+function myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue)
+	local paraRewards = 0;
+	local factionStandingText = "";
+
+	local reputationInfo = C_GossipInfo.GetFriendshipReputation(factionID);
+	local rankInfo = C_GossipInfo.GetFriendshipReputationRanks(factionID);
+	
+	local isFriendshipFaction = reputationInfo.friendshipFactionID > 0;
+	
+	local isFollower;
+	if (rankInfo.maxLevel == 3) then
+		isFollower = true;
+	else
+		isFollower = false;
+	end
+
+	-- check if this is a friendship faction 
+	if (isFriendshipFaction) then
+		standingID = rankInfo.currentLevel;
+		if ( reputationInfo.nextThreshold ) then
+			barMin, barMax, barValue = reputationInfo.reactionThreshold, reputationInfo.nextThreshold, reputationInfo.standing;
+		else
+			-- max rank
+			barMin, barMax, barValue = reputationInfo.reactionThreshold, reputationInfo.maxRep, reputationInfo.standing;
+		end
+		
+		factionStandingText = reputationInfo.reaction;
+	else
+		local gender = UnitSex("player");
+		factionStandingText = GetText("FACTION_STANDING_LABEL"..standingID, gender);
+	end
+
+	local isParagon = C_Reputation.IsFactionParagon(factionID);
+
+	if (isParagon and barMin == 42000 and barMax == 42000 and barValue == 42000) then
+		local paraValue, paraThreshold, paraQuestId, paraRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
+		paraRewards = math.floor(paraValue / paraThreshold);
+		barMin = 0;
+		barMax = paraThreshold;
+		barValue = paraValue - (paraRewards * paraThreshold);
+		standingID = standingID + paraRewards;
+		
+		if (myReputation_Config.Debug == true) then
+			myReputation_ChatMsg(name..' '..paraValue..' '..paraThreshold..' '..paraRewards);
+		end
+
+		factionStandingText = "Paragon";
+	end
+
+	--Normalize Values
+	barMax = barMax - barMin;
+	barValue = barValue - barMin;
+	barMin = 0;
+	
+	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower;
+end
+
 -- Reputation frame
-function myReputation_Frame_Update_New()
-	lOriginal_ReputationFrame_Update();
+function myReputation_ReputationFrame_InitReputationRow(factionRow, elementData)
+	if (myReputation_Config.Debug == true) then
+		myReputation_ChatMsg("ReputationFrame_InitReputationRow");
+	end
+	
+	lOriginal_ReputationFrame_InitReputationRow(factionRow, elementData);
+	
+	local factionIndex = elementData.index;
+	local factionContainer = factionRow.Container;
+	local factionBar = factionContainer.ReputationBar;
+	local factionButton = factionContainer.ExpandOrCollapseButton;
+	local factionStanding = factionBar.FactionStanding;
 	
 	local info = myReputation_Explode(myReputation_Config.Info, ',');
 	local tooltip = myReputation_Explode(myReputation_Config.Tooltip, ',');
 	
-	local numFactions = GetNumFactions();
-	local factionIndex, factionRow, factionTitle, factionStanding, factionBar, factionButton, factionLeftLine, factionBottomLine, factionBackground, color, tooltipStanding;
-	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus;
-	local atWarIndicator, rightBarTexture;
-	local factionCompleteInfo, factionTooltip, difference, factionStandingText;
-
-	local factionOffset = FauxScrollFrame_GetOffset(ReputationListScrollFrame);
-
-	local gender = UnitSex("player");
-	local guildName = GetGuildInfo("player");
+	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex);
+	local isParagon, paraRewards, factionStandingText, isFollower;
 	
-	local i;
-	
-	for i=1, NUM_FACTIONS_DISPLAYED, 1 do
-		factionIndex = factionOffset + i;
-		factionRow = _G["ReputationBar"..i];
-		factionBar = _G["ReputationBar"..i.."ReputationBar"];
-		factionTitle = _G["ReputationBar"..i.."FactionName"];
-		factionButton = _G["ReputationBar"..i.."ExpandOrCollapseButton"];
-		factionLeftLine = _G["ReputationBar"..i.."LeftLine"];
-		factionBottomLine = _G["ReputationBar"..i.."BottomLine"];
-		factionStanding = _G["ReputationBar"..i.."ReputationBarFactionStanding"];
-		factionBackground = _G["ReputationBar"..i.."Background"];
+	if ((factionStanding:GetText() ~= nil) and (not isHeader or hasRep)) then
+		barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+		
+		--Normalize Values
+		barMax = barMax - barMin;
+		barValue = barValue - barMin;
+		barMin = 0;
 
-		if (factionIndex <= numFactions) then
-			name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex);
-			factionTitle:SetText(name);
+		local difference = 0;
 
-			if (not isHeader or hasRep) then
-				-- check if this is a friendship faction 
-				local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
-				local isParagon = C_Reputation.IsFactionParagon(factionID);
-				local currentRank = GetFriendshipReputationRanks(factionID);
-				if (friendID ~= nil) then
-					factionStandingText = friendTextLevel;
-					standingID = currentRank;
-					if ( nextFriendThreshold ) then
-						barMin, barMax, barValue = friendThreshold, nextFriendThreshold, friendRep;
-					else
-						-- max rank
-						barMin, barMax, barValue = friendThreshold, friendMaxRep, friendRep;
-					end
-				else
-					factionStandingText = GetText("FACTION_STANDING_LABEL"..standingID, gender);
-				end
+		-- guild name was not available on login
+		if (mySessionReputations[name] == nil and guildName ~= nil and name == guildName) then
+			bakName = name;
+			name = GUILD_REPUTATION;
+		end
 
-				if (isParagon and barMin == 42000 and barMax == 42000 and barValue == 42000) then
-					local paraValue, paraThreshold, paraQuestId, paraRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
-					local paraRewards = math.floor(paraValue / paraThreshold);
-					factionStandingText = "Paragon";
-					barMin = 0;
-					barMax = paraThreshold;
-					barValue = paraValue - (paraRewards * paraThreshold);
-					standingID = standingID + paraRewards;
-				end
-
-				--Normalize Values
-				barMax = barMax - barMin;
-				barValue = barValue - barMin;
-				barMin = 0;
-
-				if ((not isHeader or hasRep) and (factionStanding:GetText() ~= nil)) then
-					local difference = 0;
-
-					-- guild name was not available on login
-					if (mySessionReputations[name] == nil and guildName ~= nil and name == guildName) then
-						bakName = name;
-						name = GUILD_REPUTATION;
-					end
-
-					if (mySessionReputations[name]) then
-						-- No change in standing
-						if (mySessionReputations[name].standingID == standingID) then
-							difference = barValue - mySessionReputations[name].barValue;
-						-- Reputation went up and reached next standing
-						elseif (mySessionReputations[name].standingID < standingID) then
-							difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
-						-- Reputation went down and reached next standing
-						else
-							difference = barMax - barValue + mySessionReputations[name].barValue;
-						end
-					end
-					local join;
-					-- guild name should be displayed
-					if (bakName ~= nil) then
-						name = bakName;
-					end
-					factionCompleteInfo = factionStandingText;
-					if (type(info) == 'table') then
-						factionCompleteInfo = '';
-						join = '';
-						for i,v in ipairs(info) do
-							if (v == 'Text') then
-								factionCompleteInfo = factionCompleteInfo..join..factionStandingText;
-							end
-							if (barMax > 0) then
-								if (v == 'Percent') then
-									factionCompleteInfo = factionCompleteInfo..join..format("%.1f%%", barValue / barMax * 100);
-								end
-								if (v == 'Absolute') then
-									factionCompleteInfo = factionCompleteInfo..join..barValue.."/"..barMax;
-								end
-								if (v == 'Difference') then
-									if (join ~= '') then
-										factionCompleteInfo = factionCompleteInfo..join..'('..difference..')';
-									else
-										factionCompleteInfo = factionCompleteInfo..join..difference;
-									end
-								end
-							end
-							join = ' ';
-						end
-					end
-					factionTooltip = barValue.."/"..barMax;
-					if (type(tooltip) == 'table') then
-						factionTooltip = '';
-						join = '';
-						for i,v in ipairs(tooltip) do
-							if (v == 'Text') then
-								factionTooltip = factionTooltip..join..factionStandingText;
-							end
-							if (v == 'Percent') then
-								factionTooltip = factionTooltip..join..format("%.1f%%", barValue / barMax * 100);
-							end
-							if (v == 'Absolute') then
-								factionTooltip = factionTooltip..join..barValue.."/"..barMax;
-							end
-							if (v == 'Difference') then
-								if (join ~= '') then
-									factionTooltip = factionTooltip..join..'('..difference..')';
-								else
-									factionTooltip = factionTooltip..join..difference;
-								end
-							end
-							join = ' ';
-						end
-					end
-					factionStanding:SetText(factionCompleteInfo);
-					factionRow.standingText = factionCompleteInfo;
-					factionRow.rolloverText = HIGHLIGHT_FONT_COLOR_CODE..factionTooltip..FONT_COLOR_CODE_CLOSE;
-				end
+		if (mySessionReputations[name]) then
+			-- No change in standing
+			if (mySessionReputations[name].standingID == standingID) then
+				difference = barValue - mySessionReputations[name].barValue;
+			-- Reputation went up and reached next standing
+			elseif (mySessionReputations[name].standingID < standingID) then
+				difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
+			-- Reputation went down and reached next standing
+			else
+				difference = barMax - barValue + mySessionReputations[name].barValue;
 			end
 		end
+		local join;
+		-- guild name should be displayed
+		if (bakName ~= nil) then
+			name = bakName;
+		end
+		factionCompleteInfo = factionStandingText;
+		if (type(info) == 'table') then
+			factionCompleteInfo = '';
+			join = '';
+			for i,v in ipairs(info) do
+				if (v == 'Text') then
+					factionCompleteInfo = factionCompleteInfo..join..factionStandingText;
+				end
+				if (barMax > 0) then
+					if (v == 'Percent') then
+						factionCompleteInfo = factionCompleteInfo..join..format("%.1f%%", barValue / barMax * 100);
+					end
+					if (v == 'Absolute') then
+						factionCompleteInfo = factionCompleteInfo..join..barValue.."/"..barMax;
+					end
+					if (v == 'Difference') then
+						if (join ~= '') then
+							factionCompleteInfo = factionCompleteInfo..join..'('..difference..')';
+						else
+							factionCompleteInfo = factionCompleteInfo..join..difference;
+						end
+					end
+				end
+				join = ' ';
+			end
+		end
+		factionTooltip = barValue.."/"..barMax;
+		if (type(tooltip) == 'table') then
+			factionTooltip = '';
+			join = '';
+			for i,v in ipairs(tooltip) do
+				if (v == 'Text') then
+					factionTooltip = factionTooltip..join..factionStandingText;
+				end
+				if (v == 'Percent') then
+					factionTooltip = factionTooltip..join..format("%.1f%%", barValue / barMax * 100);
+				end
+				if (v == 'Absolute') then
+					factionTooltip = factionTooltip..join..barValue.."/"..barMax;
+				end
+				if (v == 'Difference') then
+					if (join ~= '') then
+						factionTooltip = factionTooltip..join..'('..difference..')';
+					else
+						factionTooltip = factionTooltip..join..difference;
+					end
+				end
+				join = ' ';
+			end
+		end
+		factionStanding:SetText(factionCompleteInfo);
+		factionRow.standingText = factionCompleteInfo;
+		factionRow.rolloverText = HIGHLIGHT_FONT_COLOR_CODE..factionTooltip..FONT_COLOR_CODE_CLOSE;
 	end
 end
 
 -- Chat messages (event UPDATE_FACTION)
 function myReputation_Factions_Update()
-	if (myReputation_Config.Debug == true) then
-		myReputation_ChatMsg("myReputation_Factions_Update");
-	end
-    
 	local numFactions = GetNumFactions();
 	local factionIndex, factionStanding, factionBar, factionHeader, color;
 	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus;
 	local barMax, barMin, barValue;
 	local RepRemains, RepRepeats, RepBefore, RepActual, RepNext;
-	local paraRewards;
+	local isParagon, paraRewards, factionStandingText, isFollower;
 
+	if (myReputation_Config.Debug == true) then
+		myReputation_ChatMsg("myReputation_Factions_Update - Factions "..numFactions);
+	end
+    
 	for factionIndex=1, numFactions, 1 do
 		name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex);
 
 		if (not isHeader or hasRep) then
-			-- check if this is a friendship faction 
-			local friendID, friendRep, friendMaxRep, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID);
-			local isParagon = C_Reputation.IsFactionParagon(factionID);
-			local currentRank, maxRank = GetFriendshipReputationRanks(factionID);
-			local IsFollower;
-			if (maxRank == 3) then
-				IsFollower = true;
-			else
-				IsFollower = false;
+			if (myReputation_Config.Debug == true) then
+				myReputation_ChatMsg("Checking "..name);
 			end
-			if (friendID ~= nil) then
-				--DEFAULT_CHAT_FRAME:AddMessage("factionID/friendID/IsFollower/currentRank/maxRank: " .. name .. " - " .. factionID .. "/" .. friendID .. "/" .. tostring(IsFollower) .. "/" .. currentRank .. "/" .. maxRank);
-				standingID = currentRank;
-				if ( nextFriendThreshold ) then
-					barMin, barMax, barValue = friendThreshold, nextFriendThreshold, friendRep;
-				else
-					-- max rank
-					barMin, barMax, barValue = friendThreshold, friendMaxRep, friendRep;
-				end
-			end
-            
-			if (isParagon and barMin == 42000 and barMax == 42000 and barValue == 42000) then
-				local paraValue, paraThreshold, paraQuestId, paraRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
-				paraRewards = math.floor(paraValue / paraThreshold);
-				text = "Paragon";
-				barMin = 0;
-				barMax = paraThreshold;
-				barValue = paraValue - (paraRewards * paraThreshold);
-				standingID = standingID + paraRewards;
-				if (myReputation_Config.Debug == true) then
-					myReputation_ChatMsg("Paragon "..name.." value "..paraValue);
-				end
-			end
+			
+			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 
 			--Normalize Values
 			barMax = barMax - barMin;
@@ -664,8 +635,12 @@ function myReputation_Factions_Update()
 			barMin = 0;
 
 			if (myReputations[name]) then
-				if (friendID ~= nil) then
-					if IsFollower then
+				if (myReputation_Config.Debug == true) then
+					myReputation_ChatMsg("myReputations[name].standingID/standingID: "..myReputations[name].standingID.."/"..standingID);
+				end
+				
+				if (isFriendshipFaction) then
+					if isFollower then
 						if (standingID ~= 1) then
 							RepBefore = myReputation_Follower_Level[standingID-1];
 						end
@@ -704,10 +679,12 @@ function myReputation_Factions_Update()
 
 				local RawTotal = 0;
 
-				--DEFAULT_CHAT_FRAME:AddMessage("myReputations[name].standingID/standingID: " .. myReputations[name].standingID .. "/" .. standingID);
 				-- No change in standing
 				if (myReputations[name].standingID == standingID) then
-				--DEFAULT_CHAT_FRAME:AddMessage("No change in standing");
+					if (myReputation_Config.Debug == true) then
+						myReputation_ChatMsg("No change in standing");
+					end
+					
 					local difference = barValue - myReputations[name].barValue;
 
 					-- Reputation went up
@@ -742,7 +719,10 @@ function myReputation_Factions_Update()
 
 				-- Reputation went up and reached next standing
 				elseif (myReputations[name].standingID < standingID) then
-				--DEFAULT_CHAT_FRAME:AddMessage("Reputation went up and reached next standing");
+					if (myReputation_Config.Debug == true) then
+						myReputation_ChatMsg("Reputation went up and reached next standing");
+					end
+					
 					RepRemains = barMax - barValue;
 					RawTotal = barValue + myReputations[name].barMax - myReputations[name].barValue;
 					myReputation_RepMsg(format(MYREP_NOTIFICATION_GAINED,name,RawTotal,barValue,barMax), 0.5, 0.5, 1.0);
@@ -763,7 +743,10 @@ function myReputation_Factions_Update()
 
 				-- Reputation went down and reached next standing
 				else
-				--DEFAULT_CHAT_FRAME:AddMessage("Reputation went down and reached next standing");
+					if (myReputation_Config.Debug == true) then
+						myReputation_ChatMsg("Reputation went down and reached next standing");
+					end
+					
 					RepRemains = barValue;
 					RawTotal = barMax - barValue + myReputations[name].barValue;
 					myReputation_RepMsg(format(MYREP_NOTIFICATION_LOST,name,RawTotal,barValue,barMax), 0.5, 0.5, 1.0);

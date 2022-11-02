@@ -21,6 +21,10 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 100000 R1
+* TOC update for 10.0
+* first Dragonflight patches (thanks gryphon63)
+
 ### 90100 R1
 * just a toc update
 
