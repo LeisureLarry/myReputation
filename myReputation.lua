@@ -473,8 +473,12 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 	end
 
 	local isParagon = C_Reputation.IsFactionParagon(factionID);
+		
+	if (myReputation_Config.Debug == true) then
+		myReputation_ChatMsg(name..' '..tostring(isParagon)..' '..barMin..' '..barMax..' '..barValue);
+	end
 
-	if (isParagon and barMin == 42000 and barMax == 42000 and barValue == 42000) then
+	if (isParagon and barMin == barMax and barValue == barMax) then
 		local paraValue, paraThreshold, paraQuestId, paraRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
 		paraRewards = math.floor(paraValue / paraThreshold);
 		barMin = 0;
