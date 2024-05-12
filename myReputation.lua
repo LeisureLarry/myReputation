@@ -497,8 +497,9 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 	barMax = barMax - barMin;
 	barValue = barValue - barMin;
 	barMin = 0;
+	friendTextLevel = reputationInfo.reaction;
 	
-	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower;
+	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel;
 end
 
 -- Reputation frame
@@ -618,6 +619,7 @@ function myReputation_Factions_Update()
 	local barMax, barMin, barValue;
 	local RepRemains, RepRepeats, RepBefore, RepActual, RepNext;
 	local isParagon, paraRewards, factionStandingText, isFollower;
+	local friendTextLevel;
 
 	if (myReputation_Config.Debug == true) then
 		myReputation_ChatMsg("myReputation_Factions_Update - Factions "..numFactions);
@@ -631,7 +633,7 @@ function myReputation_Factions_Update()
 				myReputation_ChatMsg("Checking "..name);
 			end
 			
-			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 
 			--Normalize Values
 			barMax = barMax - barMin;
