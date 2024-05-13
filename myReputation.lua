@@ -473,7 +473,6 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 	end
 
 	local isParagon = C_Reputation.IsFactionParagon(factionID);
-	local isMajor = C_Reputation.IsMajorFaction(factionID);
 		
 	if (myReputation_Config.Debug == true) then
 		myReputation_ChatMsg(name..' '..tostring(isParagon)..' '..barMin..' '..barMax..' '..barValue);
