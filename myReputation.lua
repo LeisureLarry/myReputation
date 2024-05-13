@@ -473,7 +473,7 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 	end
 
 	local isParagon = C_Reputation.IsFactionParagon(factionID);
-		
+
 	if (myReputation_Config.Debug == true) then
 		myReputation_ChatMsg(name..' '..tostring(isParagon)..' '..barMin..' '..barMax..' '..barValue);
 	end
@@ -493,13 +493,25 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 		factionStandingText = "Paragon";
 	end
 
+	local isMajorFaction = factionID and C_Reputation.IsMajorFaction(factionID);
+
+	if (isMajorFaction) then
+		local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID);
+		barMin, barMax = 0, majorFactionData.renownLevelThreshold;
+		local isCapped = C_MajorFactions.HasMaximumRenown(factionID);
+		barValue = isCapped and majorFactionData.renownLevelThreshold or majorFactionData.renownReputationEarned or 0;
+		standingID = majorFactionData.renownLevel;
+
+		factionStandingText = "Renown "..majorFactionData.renownLevel;
+	end
+
 	--Normalize Values
 	barMax = barMax - barMin;
 	barValue = barValue - barMin;
 	barMin = 0;
-	friendTextLevel = reputationInfo.reaction;
+	local friendTextLevel = reputationInfo.reaction;
 	
-	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel;
+	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel, isMajorFaction;
 end
 
 -- Reputation frame
@@ -619,7 +631,8 @@ function myReputation_Factions_Update()
 	local barMax, barMin, barValue;
 	local RepRemains, RepRepeats, RepBefore, RepActual, RepNext;
 	local isParagon, paraRewards, factionStandingText, isFollower;
-	local friendTextLevel;
+	local friendTextLevel, isMajorFaction;
+	local maxRank = 8;
 
 	if (myReputation_Config.Debug == true) then
 		myReputation_ChatMsg("myReputation_Factions_Update - Factions "..numFactions);
@@ -633,7 +646,7 @@ function myReputation_Factions_Update()
 				myReputation_ChatMsg("Checking "..name);
 			end
 			
-			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel, isMajorFaction = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 
 			--Normalize Values
 			barMax = barMax - barMin;
@@ -667,7 +680,6 @@ function myReputation_Factions_Update()
 						end
 					end 
 				else
-					maxRank = 8;
 					if (standingID ~= 1) then
 						RepBefore = _G["FACTION_STANDING_LABEL"..standingID-1];
 					end
@@ -679,6 +691,10 @@ function myReputation_Factions_Update()
 						-- Starting with Paragon 0 (0 Rewards)
 						RepActual = "Paragon "..(paraRewards);
 						RepNext = "Paragon "..(paraRewards+1);
+						maxRank = standingID + 1;
+					elseif (isMajorFaction) then
+						RepActual = "Renown "..standingID;
+						RepNext = "Renown "..(standingID+1);
 						maxRank = standingID + 1;
 					end
 				end
