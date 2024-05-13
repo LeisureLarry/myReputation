@@ -126,11 +126,11 @@ function myReputation_OnEvent(self, event, ...)
 			local numFactions = GetNumFactions();
 			local factionIndex;
 			local name, standingID, barMin, barMax, barValue, isHeader, hasRep, factionID, hasBonusRepGain, canBeLFGBonus, _;
-			local isParagon, paraRewards, factionStandingText, isFollower;
+			local isParagon, paraRewards, factionStandingText, isFollower, isMajorFaction, renownLevel;
 			for factionIndex=1, numFactions, 1 do
 				name, _, standingID, barMin, barMax, barValue, _, _, isHeader, _, hasRep, _, _, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex);
 				if (not isHeader or hasRep) then
-					barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+					barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, _, isMajorFaction, renownLevel = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 					
 					--Normalize Values
 					barMax = barMax - barMin;
@@ -138,7 +138,11 @@ function myReputation_OnEvent(self, event, ...)
 					barMin = 0;
 					
 					mySessionReputations[name] = { };
-					mySessionReputations[name].standingID = standingID;
+					if (isMajorFaction) then
+						mySessionReputations[name].standingID = renownLevel;
+					else
+						mySessionReputations[name].standingID = standingID;
+					end
 					mySessionReputations[name].barValue = barValue;
 					mySessionReputations[name].barMax = barMax;
 				end
@@ -384,14 +388,19 @@ function myReputation_ReputationBarMixin_OnClick(self, down)
 	
 	if (ReputationDetailFrame:IsShown()) then
 		local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID = GetFactionInfo(self.index);
-		local isParagon, paraRewards, factionStandingText, isFollower;
+		local isParagon, paraRewards, factionStandingText, isFollower, isMajorFaction, renownLevel;
 
 		if (not isHeader or hasRep) then
-			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, _, isMajorFaction, renownLevel = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 
 			local absolute = barValue.."/"..barMax;
 			local percent = format("%.1f%%", barValue / barMax * 100);
 			local difference = 0;
+			local color = FACTION_BAR_COLORS[standingID];
+
+			if (isMajorFaction) then
+				standingID = renownLevel;
+			end
 
 			if (mySessionReputations[name]) then
 				-- No change in standing
@@ -400,7 +409,11 @@ function myReputation_ReputationBarMixin_OnClick(self, down)
 
 				-- Reputation went up and reached next standing
 				elseif (mySessionReputations[name].standingID < standingID) then
-					difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
+					if (isMajorFaction) then
+						difference = barValue + ((standingID - mySessionReputations[name].standingID) * mySessionReputations[name].barMax) - mySessionReputations[name].barValue;
+					else
+						difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
+					end
 
 				-- Reputation went down and reached next standing
 				else
@@ -414,8 +427,6 @@ function myReputation_ReputationBarMixin_OnClick(self, down)
 				difference = "-";
 			end
 		
-			local color = FACTION_BAR_COLORS[standingID];
-
 			myReputation_ReputationDetailFrameDetails:SetTextColor(color.r, color.g, color.b);
 			myReputation_ReputationDetailFrameText:SetText(
 				format(MYREP_MSG_FORMAT, MYREP_INFO_TEXT..":", factionStandingText)
@@ -484,7 +495,6 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 		barMin = 0;
 		barMax = paraThreshold;
 		barValue = paraValue - (paraRewards * paraThreshold);
-		standingID = standingID + paraRewards;
 		
 		if (myReputation_Config.Debug == true) then
 			myReputation_ChatMsg(name..' '..paraValue..' '..paraThreshold..' '..paraRewards);
@@ -494,15 +504,16 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 	end
 
 	local isMajorFaction = factionID and C_Reputation.IsMajorFaction(factionID);
+	local renownLevel;
 
 	if (isMajorFaction) then
 		local majorFactionData = C_MajorFactions.GetMajorFactionData(factionID);
 		barMin, barMax = 0, majorFactionData.renownLevelThreshold;
 		local isCapped = C_MajorFactions.HasMaximumRenown(factionID);
 		barValue = isCapped and majorFactionData.renownLevelThreshold or majorFactionData.renownReputationEarned or 0;
-		standingID = majorFactionData.renownLevel;
+		renownLevel = majorFactionData.renownLevel;
 
-		factionStandingText = "Renown "..majorFactionData.renownLevel;
+		factionStandingText = "Renown "..renownLevel;
 	end
 
 	--Normalize Values
@@ -511,7 +522,7 @@ function myReputation_GetReputationDetails(name, factionID, standingID, barMin, 
 	barMin = 0;
 	local friendTextLevel = reputationInfo.reaction;
 	
-	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel, isMajorFaction;
+	return barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel, isMajorFaction, renownLevel;
 end
 
 -- Reputation frame
@@ -532,10 +543,10 @@ function myReputation_ReputationFrame_InitReputationRow(factionRow, elementData)
 	local tooltip = myReputation_Explode(myReputation_Config.Tooltip, ',');
 	
 	local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canBeLFGBonus = GetFactionInfo(factionIndex);
-	local isParagon, paraRewards, factionStandingText, isFollower;
+	local isParagon, paraRewards, factionStandingText, isFollower, isMajorFaction, renownLevel;
 	
 	if ((factionStanding:GetText() ~= nil) and (not isHeader or hasRep)) then
-		barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+		barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, _, isMajorFaction, renownLevel = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 		
 		--Normalize Values
 		barMax = barMax - barMin;
@@ -550,13 +561,21 @@ function myReputation_ReputationFrame_InitReputationRow(factionRow, elementData)
 			name = GUILD_REPUTATION;
 		end
 
+		if (isMajorFaction) then
+			standingID = renownLevel;
+		end
+
 		if (mySessionReputations[name]) then
 			-- No change in standing
 			if (mySessionReputations[name].standingID == standingID) then
 				difference = barValue - mySessionReputations[name].barValue;
 			-- Reputation went up and reached next standing
 			elseif (mySessionReputations[name].standingID < standingID) then
-				difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
+				if (isMajorFaction) then
+					difference = barValue + ((standingID - mySessionReputations[name].standingID) * mySessionReputations[name].barMax) - mySessionReputations[name].barValue;
+				else
+					difference = barValue + mySessionReputations[name].barMax - mySessionReputations[name].barValue;
+				end
 			-- Reputation went down and reached next standing
 			else
 				difference = barMax - barValue + mySessionReputations[name].barValue;
@@ -631,7 +650,7 @@ function myReputation_Factions_Update()
 	local barMax, barMin, barValue;
 	local RepRemains, RepRepeats, RepBefore, RepActual, RepNext;
 	local isParagon, paraRewards, factionStandingText, isFollower;
-	local friendTextLevel, isMajorFaction;
+	local friendTextLevel, isMajorFaction, renownLevel;
 	local maxRank = 8;
 
 	if (myReputation_Config.Debug == true) then
@@ -646,7 +665,7 @@ function myReputation_Factions_Update()
 				myReputation_ChatMsg("Checking "..name);
 			end
 			
-			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel, isMajorFaction = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
+			barMax, barMin, barValue, isParagon, paraRewards, factionStandingText, isFriendshipFaction, isFollower, friendTextLevel, isMajorFaction, renownLevel = myReputation_GetReputationDetails(name, factionID, standingID, barMin, barMax, barValue);
 
 			--Normalize Values
 			barMax = barMax - barMin;
@@ -693,9 +712,11 @@ function myReputation_Factions_Update()
 						RepNext = "Paragon "..(paraRewards+1);
 						maxRank = standingID + 1;
 					elseif (isMajorFaction) then
-						RepActual = "Renown "..standingID;
-						RepNext = "Renown "..(standingID+1);
-						maxRank = standingID + 1;
+						RepActual = "Renown "..renownLevel;
+						RepNext = "Renown "..(renownLevel+1);
+						standingID = renownLevel;
+						local isCapped = C_MajorFactions.HasMaximumRenown(factionID);
+						maxRank = (isCapped and renownLevel) or (renownLevel + 1);
 					end
 				end
 
@@ -746,7 +767,11 @@ function myReputation_Factions_Update()
 					end
 					
 					RepRemains = barMax - barValue;
-					RawTotal = barValue + myReputations[name].barMax - myReputations[name].barValue;
+					if (isMajorFaction) then
+						RawTotal = barValue + ((standingID - myReputations[name].standingID) * myReputations[name].barMax) - myReputations[name].barValue;
+					else
+						RawTotal = barValue + myReputations[name].barMax - myReputations[name].barValue;
+					end
 					myReputation_RepMsg(format(MYREP_NOTIFICATION_GAINED,name,RawTotal,barValue,barMax), 0.5, 0.5, 1.0);
 					myReputation_RepMsg(format(MYREP_NOTIFICATION_REACHED,RepActual,name), 1.0, 1.0, 0.0);
 					if (standingID ~= maxRank) then
@@ -787,12 +812,15 @@ function myReputation_Factions_Update()
 						myReputation_SplashMessage(name.." - "..RepActual.."!", 1.0, 1.0, 0.0);
 					end
 				end
-
 			else
 				myReputations[name] = { };
 			end
 
-			myReputations[name].standingID = standingID;
+			if (isMajorFaction) then
+				myReputations[name].standingID = renownLevel;
+			else
+				myReputations[name].standingID = standingID;
+			end
 			myReputations[name].barValue = barValue;
 			myReputations[name].barMax = barMax;
 		end
