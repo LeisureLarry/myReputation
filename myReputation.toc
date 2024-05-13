@@ -1,11 +1,11 @@
-## Interface: 100206
-## Title: myReputation |cff00aa00100206.1|r
+## Interface: 100207
+## Title: myReputation |cff00aa00100207.1|r
 ## Notes: Changed display of reputation window and chat messages.
 ## Notes-deDE: Verbesserte Anzeige des Reputationsfensters und der Chatmeldungen.
 ## Author: Original by Egris & Karmond; Fork by Larry @ Baelgun [DE]; Maintainers HonorGoG/Kharthus
 ## SavedVariables: myReputation_Config
 ## Dependencies:
-## Version: 100206.1
+## Version: 100207.1
 ## DefaultState: enabled
 
 myReputation.xml
