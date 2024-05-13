@@ -21,6 +21,16 @@ To open the settings, use the chat command /myrep or /myreputation.
 
 ## Version history
 
+### 100207 R1
+* TOC update for Patch 10.2.7 by @jgleigh
+* Renown reputation tracking and bug fixes for friendship reputations by @jgleigh
+
+### 100206 R1
+* just a toc update
+
+### 100002 R1
+* just a toc update
+
 ### 100000 R1
 * TOC update for 10.0
 * first Dragonflight patches (thanks gryphon63)
